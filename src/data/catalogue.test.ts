@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CATALOGUE, slug } from './catalogue'
 import { AISLES } from '../domain/types'
+import { DEMO_RECIPES } from './demoRecipes'
 
 describe('catalogue de départ', () => {
   it('n’a aucun identifiant en double', () => {
@@ -32,5 +33,25 @@ describe('slug', () => {
     expect(slug('Crème fraîche')).toBe('creme-fraiche')
     expect(slug("Huile d'olive")).toBe('huile-d-olive')
     expect(slug('  Épinard frais  ')).toBe('epinard-frais')
+  })
+})
+
+describe('repas de démonstration', () => {
+  it('ne référence que des ingrédients existants du catalogue', () => {
+    // Une faute de frappe dans un id ferait disparaître l'ingrédient de la liste de courses
+    // sans le moindre message : buildShoppingList ignore les références inconnues.
+    const known = new Set(CATALOGUE.map((i) => i.id))
+    const unknown = DEMO_RECIPES.flatMap((r) =>
+      r.items.filter((i) => !known.has(i.ingredientId)).map((i) => `${r.name} → ${i.ingredientId}`),
+    )
+    expect(unknown).toEqual([])
+  })
+
+  it('a des portions et des étapes exploitables', () => {
+    for (const r of DEMO_RECIPES) {
+      expect(r.servings, r.name).toBeGreaterThanOrEqual(1)
+      expect(r.steps.split('\n').filter(Boolean).length, r.name).toBeGreaterThan(2)
+      expect(r.items.length, r.name).toBeGreaterThan(0)
+    }
   })
 })

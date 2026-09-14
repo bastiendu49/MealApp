@@ -5,8 +5,10 @@ import { AISLES, COMMON_UNITS, type Aisle, type Ingredient, type Recipe } from '
 /** Comparaison tolérante aux accents et à la casse, pour empêcher « Oignon » et « oignon ». */
 const norm = (s: string) => slug(s.trim())
 
-type FormProps = {
+export type FormProps = {
   initial: Ingredient | null
+  /** Pré-remplit le nom quand on crée l'ingrédient depuis un formulaire de repas. */
+  defaultName?: string
   ingredients: Ingredient[]
   usedIn: string[]
   onSave: (ingredient: Ingredient) => void
@@ -14,14 +16,31 @@ type FormProps = {
   onClose: () => void
 }
 
-function IngredientForm({ initial, ingredients, usedIn, onSave, onDelete, onClose }: FormProps) {
+export function IngredientForm({
+  initial,
+  defaultName,
+  ingredients,
+  usedIn,
+  onSave,
+  onDelete,
+  onClose,
+}: FormProps) {
   const ref = useRef<HTMLDialogElement>(null)
-  const [name, setName] = useState(initial?.name ?? '')
+  const [name, setName] = useState(initial?.name ?? defaultName ?? '')
   const [unit, setUnit] = useState(initial?.unit ?? 'g')
   const [aisle, setAisle] = useState<Aisle>(initial?.aisle ?? 'Autres')
   const [pantry, setPantry] = useState(initial?.pantry ?? false)
 
-  useEffect(() => ref.current?.showModal(), [])
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog) return
+    // showModal() donne d'office le focus au premier champ focusable. Sur Android le clavier
+    // s'ouvre alors aussitôt et masque la fiche qu'on voulait justement lire. L'attribut
+    // autofocus posé sur le <dialog> lui-même capte ce focus initial.
+    // On garde le focus sur le nom à la création : il n'y a rien à lire, seulement à saisir.
+    if (initial) dialog.setAttribute('autofocus', '')
+    dialog.showModal()
+  }, [initial])
 
   const duplicate = ingredients.some((i) => i.id !== initial?.id && norm(i.name) === norm(name))
   const error = !name.trim()
@@ -47,13 +66,23 @@ function IngredientForm({ initial, ingredients, usedIn, onSave, onDelete, onClos
   }
 
   return (
-    <dialog ref={ref} onClose={onClose} onClick={(e) => e.target === ref.current && onClose()}>
+    <dialog
+      ref={ref}
+      tabIndex={-1}
+      onClose={onClose}
+      onClick={(e) => e.target === ref.current && onClose()}
+    >
       <form className="sheet" onSubmit={submit}>
         <h2>{initial ? 'Modifier l’ingrédient' : 'Nouvel ingrédient'}</h2>
 
         <label>
           Nom
-          <input value={name} onChange={(e) => setName(e.target.value)} autoFocus required />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            autoFocus={!initial}
+            required
+          />
         </label>
 
         <label>
