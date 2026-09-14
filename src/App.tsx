@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import { CATALOGUE } from './data/catalogue'
+import { usePersisted } from './domain/store'
+import type { Ingredient, Recipe } from './domain/types'
+import Ingredients from './screens/Ingredients'
 
 const TABS = [
   { id: 'repas', label: 'Repas', glyph: '🍽️' },
@@ -32,9 +36,7 @@ function Diagnostic() {
     navigator.serviceWorker?.ready.then(() => setSwReady(true), () => {})
   }, [])
 
-  const yes = (v: boolean) => (
-    <span className={v ? 'ok' : 'ko'}>{v ? 'oui' : 'non'}</span>
-  )
+  const yes = (v: boolean) => <span className={v ? 'ok' : 'ko'}>{v ? 'oui' : 'non'}</span>
 
   return (
     <div className="card">
@@ -59,29 +61,39 @@ function Diagnostic() {
           <dd>{persisted === null ? '—' : yes(persisted)}</dd>
         </div>
       </dl>
-      <p className="muted" style={{ marginBottom: 0, fontSize: '0.85rem' }}>
-        Test à faire : installer l'app, la fermer, activer le mode avion, la rouvrir. Elle doit
-        s'ouvrir normalement avec « hors ligne » affiché ci-dessus.
-      </p>
     </div>
   )
 }
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('repas')
+  // Le catalogue sert de valeur initiale : il s'écrit au premier lancement et ne revient jamais
+  // ensuite, même si l'utilisateur supprime tout.
+  const [ingredients, setIngredients, ingState] = usePersisted<Ingredient[]>('ingredients', CATALOGUE)
+  const [recipes, , recipeState] = usePersisted<Recipe[]>('recipes', [])
+
   const active = TABS.find((t) => t.id === tab)!
+  const error = ingState.error ?? recipeState.error
+  const loading = !ingState.loaded || !recipeState.loaded
 
   return (
     <div className="app">
       <header className="topbar">
         <h1>{active.label}</h1>
+        {tab === 'ingredients' && <span className="count">{ingredients.length}</span>}
       </header>
 
+      {error && <p className="banner error">{error}</p>}
+
       <main className="screen">
-        {tab === 'repas' ? (
+        {loading ? (
+          <p className="muted empty">Chargement…</p>
+        ) : tab === 'repas' ? (
           <Diagnostic />
+        ) : tab === 'ingredients' ? (
+          <Ingredients ingredients={ingredients} setIngredients={setIngredients} recipes={recipes} />
         ) : (
-          <p className="muted">À construire à l'étape suivante.</p>
+          <p className="muted empty">À construire à l’étape suivante.</p>
         )}
       </main>
 

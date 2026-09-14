@@ -52,7 +52,8 @@ body {
 }
 
 .screen {
-  padding: 16px;
+  /* Marge basse : le bouton flottant ne doit pas masquer la dernière ligne. */
+  padding: 16px 16px 88px;
 }
 
 .tabbar {
@@ -133,4 +134,265 @@ body {
 
 .ko {
   color: var(--c-accent);
+}
+
+/* ---------- éléments communs ---------- */
+
+.count {
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.banner {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+}
+
+.empty {
+  padding: 32px 0;
+  text-align: center;
+}
+
+.error {
+  color: #b3261e;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--c-muted);
+  line-height: 1.4;
+}
+
+.tag {
+  background: var(--c-accent-soft);
+  color: var(--c-accent);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+/* ---------- recherche ---------- */
+
+.search input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  font: inherit;
+  font-size: 1rem;
+  color: inherit;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+}
+
+/* ---------- listes par rayon ---------- */
+
+.group {
+  margin-top: 24px;
+}
+
+.group h2 {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-muted);
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.rows li + li {
+  border-top: 1px solid var(--c-border);
+}
+
+.rows button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rows button:active {
+  background: var(--c-accent-soft);
+}
+
+.row-name {
+  flex: 1;
+}
+
+.row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+
+/* ---------- bouton d'ajout flottant ---------- */
+
+.fab {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
+  z-index: 15;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--c-accent);
+  color: #fff;
+  font-size: 1.9rem;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 0.22);
+  cursor: pointer;
+}
+
+/* ---------- feuille modale (élément <dialog> natif) ---------- */
+
+dialog {
+  width: 100%;
+  max-width: 480px;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r) var(--r) 0 0;
+  background: var(--c-surface);
+  color: inherit;
+}
+
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.sheet {
+  display: grid;
+  gap: 16px;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  max-height: 88dvh;
+  overflow-y: auto;
+}
+
+.sheet h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.sheet label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+
+.sheet input:not([type='checkbox']),
+.sheet select,
+.sheet textarea {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+}
+
+.sheet input:disabled {
+  color: var(--c-muted);
+}
+
+.sheet label.check {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  color: var(--c-text);
+  font-size: 1rem;
+}
+
+.sheet label.check input {
+  width: 22px;
+  height: 22px;
+  margin: 2px 0 0;
+  accent-color: var(--c-accent);
+}
+
+.sheet label.check em {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.82rem;
+  font-style: normal;
+  color: var(--c-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  flex: 1;
+  min-height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--c-accent);
+  border-color: var(--c-accent) !important;
+  color: #fff;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+}
+
+.ghost {
+  background: var(--c-surface);
+  color: var(--c-text);
+}
+
+.danger {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 10px;
+  border: 1px solid var(--c-border);
+  font: inherit;
+  font-weight: 600;
+  color: #b3261e;
+  cursor: pointer;
+}
+
+.danger-zone {
+  border-top: 1px solid var(--c-border);
+  padding-top: 16px;
 }
