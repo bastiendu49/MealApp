@@ -174,21 +174,69 @@ describe('buildShoppingList', () => {
     expect(list).toEqual({ groups: [], pantry: [] })
   })
 
-  it('place les articles libres dans leur rayon, sans quantité', () => {
+  it('donne à un article ajouté à la main le rayon et l’unité de son ingrédient', () => {
+    const ingredients = [ing('cafe', { name: 'Café', unit: 'g', aisle: 'Épicerie' })]
+    const list = buildShoppingList({
+      cart: [],
+      recipes: [],
+      ingredients,
+      extras: [{ id: 'x1', ingredientId: 'cafe', qty: 250 }],
+    })
+    expect(list.groups).toEqual([
+      {
+        aisle: 'Épicerie',
+        lines: [
+          {
+            key: 'cafe',
+            name: 'Café',
+            qty: 250,
+            unit: 'g',
+            aisle: 'Épicerie',
+            sources: [{ recipeName: 'Ajouté à la main', qty: 250 }],
+          },
+        ],
+      },
+    ])
+  })
+
+  it('additionne un article ajouté à la main avec ce que demandent les recettes', () => {
+    const ingredients = [ing('beurre', { name: 'Beurre', aisle: 'Crèmerie' })]
+    const recipes = [recipe('gateau', { items: [{ ingredientId: 'beurre', qty: 100 }] })]
+    const list = buildShoppingList({
+      cart: [cart('gateau', 4)],
+      recipes,
+      ingredients,
+      extras: [{ id: 'x1', ingredientId: 'beurre', qty: 250 }],
+    })
+    // Une seule ligne, pas deux : sinon on passerait deux fois au rayon crèmerie.
+    expect(line(list, 'Beurre')?.qty).toBe(350)
+    expect(line(list, 'Beurre')?.sources).toEqual([
+      { recipeName: 'gateau', qty: 100 },
+      { recipeName: 'Ajouté à la main', qty: 250 },
+    ])
+  })
+
+  it('remet sur la liste un ingrédient de fond de placard ajouté exprès', () => {
+    // On l'a demandé explicitement : c'est qu'il n'y en a justement plus dans le placard.
+    const ingredients = [ing('sel', { name: 'Sel', unit: 'pincée', pantry: true })]
+    const list = buildShoppingList({
+      cart: [],
+      recipes: [],
+      ingredients,
+      extras: [{ id: 'x1', ingredientId: 'sel', qty: null }],
+    })
+    expect(line(list, 'Sel')).toBeDefined()
+    expect(list.pantry).toEqual([])
+  })
+
+  it('ignore un article dont l’ingrédient a disparu', () => {
     const list = buildShoppingList({
       cart: [],
       recipes: [],
       ingredients: [],
-      extras: [{ id: 'x1', name: 'Papier toilette', aisle: 'Entretien' }],
+      extras: [{ id: 'x1', ingredientId: 'fantome', qty: 1 }],
     })
-    expect(list.groups).toEqual([
-      {
-        aisle: 'Entretien',
-        lines: [
-          { key: 'x1', name: 'Papier toilette', qty: null, unit: '', aisle: 'Entretien', sources: [] },
-        ],
-      },
-    ])
+    expect(list.groups).toEqual([])
   })
 })
 
@@ -314,24 +362,44 @@ describe('lineState', () => {
   })
 
   it('laisse une ligne non cochée intacte', () => {
-    expect(lineState(at(800), {})).toEqual({ checked: false, bumped: false, done: false })
+    expect(lineState(at(800), {})).toEqual({ checked: false, bumped: false, done: false, missing: null })
   })
 
   it('marque prise une ligne cochée dont la quantité n’a pas bougé', () => {
-    expect(lineState(at(800), { k: 800 })).toEqual({ checked: true, bumped: false, done: true })
+    expect(lineState(at(800), { k: 800 })).toEqual({
+      checked: true,
+      bumped: false,
+      done: true,
+      missing: null,
+    })
   })
 
-  it('signale une quantité montée depuis le cochage sans décocher', () => {
+  it('chiffre ce qui manque quand la quantité monte après le cochage', () => {
     // Un repas ajouté au panier au milieu des courses : 500 g pris, 800 g nécessaires.
-    expect(lineState(at(800), { k: 500 })).toEqual({ checked: true, bumped: true, done: false })
+    expect(lineState(at(800), { k: 500 })).toEqual({
+      checked: true,
+      bumped: true,
+      done: false,
+      missing: 300,
+    })
   })
 
   it('ne signale rien quand la quantité a baissé', () => {
     // On en a déjà assez dans le caddie : rien à faire, la ligne reste barrée.
-    expect(lineState(at(300), { k: 500 })).toEqual({ checked: true, bumped: false, done: true })
+    expect(lineState(at(300), { k: 500 })).toEqual({
+      checked: true,
+      bumped: false,
+      done: true,
+      missing: null,
+    })
   })
 
-  it('traite « qs » et les articles libres comme simplement pris', () => {
-    expect(lineState(at(null), { k: null })).toEqual({ checked: true, bumped: false, done: true })
+  it('traite « qs » comme simplement pris', () => {
+    expect(lineState(at(null), { k: null })).toEqual({
+      checked: true,
+      bumped: false,
+      done: true,
+      missing: null,
+    })
   })
 })

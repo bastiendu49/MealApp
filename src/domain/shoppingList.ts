@@ -51,7 +51,16 @@ export function buildShoppingList(input: {
   const recipeById = new Map(recipes.map((r) => [r.id, r]))
   const ingredientById = new Map(ingredients.map((i) => [i.id, i]))
 
-  const acc = new Map<string, { ingredient: Ingredient; qty: number | null; sources: LineSource[] }>()
+  type Bucket = { ingredient: Ingredient; qty: number | null; sources: LineSource[]; forced: boolean }
+  const acc = new Map<string, Bucket>()
+  const bucketFor = (ingredient: Ingredient) => {
+    let bucket = acc.get(ingredient.id)
+    if (!bucket) {
+      bucket = { ingredient, qty: null, sources: [], forced: false }
+      acc.set(ingredient.id, bucket)
+    }
+    return bucket
+  }
 
   for (const entry of cart) {
     const recipe = recipeById.get(entry.recipeId)
@@ -63,20 +72,26 @@ export function buildShoppingList(input: {
       if (!ingredient) continue // ingrédient supprimé mais encore référencé
       const scaled = item.qty === null ? null : item.qty * factor
 
-      let bucket = acc.get(ingredient.id)
-      if (!bucket) {
-        bucket = { ingredient, qty: null, sources: [] }
-        acc.set(ingredient.id, bucket)
-      }
+      const bucket = bucketFor(ingredient)
       bucket.sources.push({ recipeName: recipe.name, qty: scaled })
       // Un « qs » ne contribue pas au total, mais reste visible dans les sources.
       if (scaled !== null) bucket.qty = (bucket.qty ?? 0) + scaled
     }
   }
 
+  for (const extra of extras) {
+    const ingredient = ingredientById.get(extra.ingredientId)
+    if (!ingredient) continue
+    const bucket = bucketFor(ingredient)
+    // Ajouté exprès à la main : il doit figurer sur la liste même s'il est marqué en stock.
+    bucket.forced = true
+    bucket.sources.push({ recipeName: 'Ajouté à la main', qty: extra.qty })
+    if (extra.qty !== null) bucket.qty = (bucket.qty ?? 0) + extra.qty
+  }
+
   const toBuy: Line[] = []
   const pantry: Line[] = []
-  for (const { ingredient, qty, sources } of acc.values()) {
+  for (const { ingredient, qty, sources, forced } of acc.values()) {
     const line: Line = {
       key: ingredient.id,
       name: ingredient.name,
@@ -85,11 +100,7 @@ export function buildShoppingList(input: {
       aisle: ingredient.aisle,
       sources,
     }
-    ;(ingredient.pantry ? pantry : toBuy).push(line)
-  }
-
-  for (const extra of extras) {
-    toBuy.push({ key: extra.id, name: extra.name, qty: null, unit: '', aisle: extra.aisle, sources: [] })
+    ;(ingredient.pantry && !forced ? pantry : toBuy).push(line)
   }
 
   const groups = AISLES.map((aisle) => ({
@@ -137,5 +148,11 @@ export function lineState(line: Line, checked: Checked) {
   const isChecked = line.key in checked
   const at = checked[line.key]
   const bumped = isChecked && at !== null && at !== undefined && line.qty !== null && line.qty > at
-  return { checked: isChecked, bumped, done: isChecked && !bumped }
+  return {
+    checked: isChecked,
+    bumped,
+    done: isChecked && !bumped,
+    /** Ce qu'il reste à prendre en plus, pour l'afficher plutôt qu'un vague avertissement. */
+    missing: bumped ? line.qty! - (at as number) : null,
+  }
 }

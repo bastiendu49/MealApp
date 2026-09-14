@@ -47,8 +47,11 @@ export type Recipe = {
 /** Un repas ajouté deux fois = deux entrées, éventuellement avec des convives différents. */
 export type CartEntry = { id: string; recipeId: string; servings: number }
 
-/** Article ajouté à la main, hors recettes. */
-export type Extra = { id: string; name: string; aisle: Aisle }
+/**
+ * Article ajouté à la main. Il référence un ingrédient du catalogue : on récupère ainsi son
+ * rayon et son unité, et l'article reste disponible pour les fois suivantes.
+ */
+export type Extra = { id: string; ingredientId: string; qty: number | null }
 
 /**
  * Articles cochés : clé de ligne -> quantité au moment du cochage.

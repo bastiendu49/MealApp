@@ -97,6 +97,7 @@ export default function App() {
             cart={cart}
             recipes={recipes}
             ingredients={ingredients}
+            setIngredients={setIngredients}
             checked={checked}
             setChecked={setChecked}
             extras={extras}

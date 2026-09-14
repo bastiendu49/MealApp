@@ -238,7 +238,9 @@ body {
   border-top: 1px solid var(--c-border);
 }
 
-.rows button {
+/* Restreint aux lignes elles-mêmes : appliqué à « tout bouton dans .rows », width: 100%
+   contaminait les boutons d'action imbriqués et disloquait la mise en page. */
+.rows > li > button {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -254,7 +256,7 @@ body {
   cursor: pointer;
 }
 
-.rows button:active {
+.rows > li > button:active {
   background: var(--c-accent-soft);
 }
 
@@ -1062,7 +1064,21 @@ dialog.confirm {
   font-size: 0.9rem;
 }
 
-.checklist li + li {
+/* Volontairement indépendant de .rows : la règle générique « .rows button { width: 100% } »
+   s'appliquait aussi aux boutons ⌄ et ✕, qui occupaient toute la ligne et écrasaient le nom
+   à zéro — d'où le texte affiché une lettre par ligne, et la croix invisible qui supprimait
+   l'article dès qu'on touchait son nom. */
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.checklist > li + li {
   border-top: 1px solid var(--c-border);
 }
 
@@ -1071,33 +1087,38 @@ dialog.confirm {
   align-items: center;
 }
 
+/* Toute la partie gauche est la zone de cochage : large cible, atteignable une main occupée. */
 .check-main {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex: 1;
+  gap: 14px;
+  flex: 1 1 auto;
   min-width: 0;
-  min-height: 54px;
-  padding: 10px 4px 10px 14px;
+  min-height: 60px;
+  padding: 12px 4px 12px 14px;
   border: 0;
   background: none;
   font: inherit;
+  font-size: 1rem;
   color: inherit;
   text-align: left;
   cursor: pointer;
+}
+
+.check-main:active {
+  background: var(--c-accent-soft);
 }
 
 .box {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  flex: 0 0 28px;
+  height: 28px;
   border: 2px solid var(--c-border);
-  border-radius: 7px;
+  border-radius: 8px;
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 700;
 }
 
@@ -1107,18 +1128,18 @@ dialog.confirm {
 }
 
 .check-qty {
-  flex-shrink: 0;
-  min-width: 76px;
+  flex: 0 0 auto;
+  min-width: 82px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
 .check-name {
+  flex: 1 1 auto;
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
-/* Article pris : estompé et barré, et poussé en bas de son rayon par le tri. */
 .checklist .done .check-main {
   color: var(--c-muted);
 }
@@ -1128,6 +1149,7 @@ dialog.confirm {
   text-decoration: line-through;
 }
 
+/* Ce qu'il reste à prendre quand la quantité a monté après le cochage. */
 .bumped {
   display: inline-block;
   margin-left: 8px;
@@ -1135,35 +1157,34 @@ dialog.confirm {
   border-radius: 999px;
   background: var(--c-accent);
   color: #fff;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  text-decoration: none;
+  white-space: nowrap;
 }
 
-.why {
-  flex-shrink: 0;
-  width: 42px;
-  height: 42px;
-  margin-right: 4px;
+.row-action {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
   border: 0;
   border-radius: 50%;
   background: none;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: var(--c-muted);
   cursor: pointer;
 }
 
-.why[aria-expanded='true'] {
+.row-action.chevron[aria-expanded='true'] {
   transform: rotate(180deg);
 }
 
 .sources {
   margin: 0;
-  padding: 2px 14px 12px 52px;
+  padding: 0 16px 14px 56px;
   list-style: none;
   display: grid;
-  gap: 4px;
-  font-size: 0.85rem;
+  gap: 5px;
+  font-size: 0.88rem;
   color: var(--c-muted);
 }
 
@@ -1180,9 +1201,9 @@ dialog.confirm {
 }
 
 .pantry summary {
-  min-height: 46px;
   display: flex;
   align-items: center;
+  min-height: 46px;
   padding: 0 4px;
   font-size: 0.9rem;
   font-weight: 600;
@@ -1190,31 +1211,37 @@ dialog.confirm {
   cursor: pointer;
 }
 
-.pantry .rows {
-  margin-top: 4px;
+.pantry-lines {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+  overflow: hidden;
 }
 
-.pantry .rows li + li {
-  border-top: 1px solid var(--c-border);
-}
-
-.pantry-line {
+.pantry-lines li {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
+  gap: 14px;
+  padding: 13px 14px;
   color: var(--c-muted);
+}
+
+.pantry-lines li + li {
+  border-top: 1px solid var(--c-border);
 }
 
 .pantry .hint {
   padding: 10px 4px 0;
 }
 
-/* ---------- article libre ---------- */
+/* ---------- article ajouté à la main ---------- */
 
 .add-extra {
   width: 100%;
-  min-height: 50px;
+  min-height: 52px;
   margin-top: 20px;
   border: 1px dashed var(--c-border);
   border-radius: var(--r);
@@ -1238,7 +1265,7 @@ dialog.confirm {
 .extra-form input,
 .extra-form select {
   width: 100%;
-  min-height: 46px;
+  min-height: 48px;
   padding: 10px 12px;
   font: inherit;
   font-size: 1rem;
@@ -1246,4 +1273,50 @@ dialog.confirm {
   background: var(--c-bg);
   border: 1px solid var(--c-border);
   border-radius: 10px;
+}
+
+.extra-form .ghost {
+  min-height: 46px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pending-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.pending-qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pending-qty input {
+  flex: 0 0 110px;
+  text-align: right;
+}
+
+/* ---------- largeur de lecture ---------- */
+
+/* Conçue pour le téléphone : au-delà, on garde une colonne centrée plutôt qu'une ligne
+   de liste étirée sur toute la largeur d'un écran d'ordinateur. */
+.app,
+.editor,
+.tabbar,
+.cart-summary {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.editor {
+  border-inline: 1px solid var(--c-border);
+}
+
+.fab {
+  right: max(16px, calc(50% - 280px + 16px));
 }

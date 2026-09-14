@@ -1,13 +1,18 @@
 import { useMemo, useState } from 'react'
+import { slug } from '../data/catalogue'
 import { buildShoppingList, formatQty, lineState, type Line } from '../domain/shoppingList'
 import { uid } from '../domain/store'
-import { AISLES, type Aisle, type CartEntry, type Checked, type Extra, type Ingredient, type Recipe } from '../domain/types'
+import type { CartEntry, Checked, Extra, Ingredient, Recipe } from '../domain/types'
 import { Confirm } from '../lib/Confirm'
+import { IngredientForm } from './Ingredients'
+
+const norm = (s: string) => slug(s.trim())
 
 type Props = {
   cart: CartEntry[]
   recipes: Recipe[]
   ingredients: Ingredient[]
+  setIngredients: (next: Ingredient[]) => void
   checked: Checked
   setChecked: (next: Checked) => void
   extras: Extra[]
@@ -20,6 +25,7 @@ export default function ShoppingList({
   cart,
   recipes,
   ingredients,
+  setIngredients,
   checked,
   setChecked,
   extras,
@@ -29,8 +35,10 @@ export default function ShoppingList({
 }: Props) {
   const [open, setOpen] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
-  const [extraName, setExtraName] = useState('')
-  const [extraAisle, setExtraAisle] = useState<Aisle>('Autres')
+  const [query, setQuery] = useState('')
+  const [pending, setPending] = useState<Ingredient | null>(null)
+  const [pendingQty, setPendingQty] = useState('')
+  const [creating, setCreating] = useState<string | null>(null)
   const [finishing, setFinishing] = useState(false)
 
   // La liste n'est pas stockée : c'est une fonction pure du panier. Impossible qu'elle
@@ -40,11 +48,8 @@ export default function ShoppingList({
     [cart, recipes, ingredients, extras],
   )
 
-  const extraIds = useMemo(() => new Set(extras.map((e) => e.id)), [extras])
-
-  const isChecked = (line: Line) => lineState(line, checked).checked
-  const bumped = (line: Line) => lineState(line, checked).bumped
-  const done = (line: Line) => lineState(line, checked).done
+  const extraIds = useMemo(() => new Set(extras.map((e) => e.ingredientId)), [extras])
+  const state = (line: Line) => lineState(line, checked)
 
   const toggle = (line: Line) => {
     const next = { ...checked }
@@ -53,68 +58,68 @@ export default function ShoppingList({
     setChecked(next)
   }
 
-  const addExtra = (e: React.FormEvent) => {
-    e.preventDefault()
-    const name = extraName.trim()
-    if (!name) return
-    setExtras([...extras, { id: uid(), name, aisle: extraAisle }])
-    setExtraName('')
+  const addPending = () => {
+    if (!pending) return
+    const raw = pendingQty.trim().replace(',', '.')
+    const n = Number(raw)
+    const qty = !raw || !Number.isFinite(n) || n < 0 ? null : n
+    setExtras([...extras, { id: uid(), ingredientId: pending.id, qty }])
+    setPending(null)
+    setPendingQty('')
+    setQuery('')
     setAdding(false)
   }
 
-  const removeExtra = (id: string) => {
-    setExtras(extras.filter((e) => e.id !== id))
-    if (id in checked) {
-      const next = { ...checked }
-      delete next[id]
-      setChecked(next)
-    }
+  const removeExtras = (ingredientId: string) => {
+    setExtras(extras.filter((e) => e.ingredientId !== ingredientId))
+    const next = { ...checked }
+    delete next[ingredientId]
+    setChecked(next)
   }
 
   const total = list.groups.reduce((n, g) => n + g.lines.length, 0)
-  const remaining = list.groups.reduce((n, g) => n + g.lines.filter((l) => !done(l)).length, 0)
+  const remaining = list.groups.reduce((n, g) => n + g.lines.filter((l) => !state(l).done).length, 0)
 
   const renderLine = (line: Line) => {
-    const isExtra = extraIds.has(line.key)
+    const { checked: isChecked, bumped, done, missing } = state(line)
     return (
-      <li key={line.key} className={done(line) ? 'done' : undefined}>
+      <li key={line.key} className={done ? 'done' : undefined}>
         <div className="check-row">
           <button
             type="button"
             className="check-main"
-            aria-pressed={isChecked(line)}
+            aria-pressed={isChecked}
             onClick={() => toggle(line)}
           >
             <span className="box" aria-hidden="true">
-              {isChecked(line) ? '✓' : ''}
+              {isChecked ? '✓' : ''}
             </span>
-            {!isExtra && <span className="check-qty">{formatQty(line.qty, line.unit)}</span>}
+            <span className="check-qty">{formatQty(line.qty, line.unit)}</span>
             <span className="check-name">
               {line.name}
-              {bumped(line) && <span className="bumped">quantité augmentée</span>}
+              {bumped && <span className="bumped">+{formatQty(missing, line.unit)}</span>}
             </span>
           </button>
 
-          {isExtra ? (
+          {extraIds.has(line.key) && (
             <button
               type="button"
-              className="remove"
-              onClick={() => removeExtra(line.key)}
-              aria-label={`Supprimer ${line.name}`}
+              className="row-action"
+              onClick={() => removeExtras(line.key)}
+              aria-label={`Retirer ${line.name} de la liste`}
             >
               ✕
             </button>
-          ) : (
-            <button
-              type="button"
-              className="why"
-              aria-expanded={open === line.key}
-              aria-label={`Origine de ${line.name}`}
-              onClick={() => setOpen(open === line.key ? null : line.key)}
-            >
-              ⌄
-            </button>
           )}
+          <button
+            type="button"
+            className="row-action chevron"
+            aria-expanded={open === line.key}
+            aria-label={`Origine de ${line.name}`}
+            onClick={() => setOpen(open === line.key ? null : line.key)}
+          >
+            ⌄
+          </button>
         </div>
 
         {open === line.key && (
@@ -131,6 +136,13 @@ export default function ShoppingList({
     )
   }
 
+  const q = norm(query)
+  const alreadyListed = new Set(list.groups.flatMap((g) => g.lines.map((l) => l.key)))
+  const matches = q
+    ? ingredients.filter((i) => !alreadyListed.has(i.id) && norm(i.name).includes(q)).slice(0, 6)
+    : []
+  const exactExists = ingredients.some((i) => norm(i.name) === q)
+
   if (cart.length === 0 && extras.length === 0) {
     return (
       <div className="empty">
@@ -145,16 +157,20 @@ export default function ShoppingList({
   return (
     <>
       <p className="list-count muted">
-        {remaining === 0 ? 'Tout est pris.' : `${remaining} article${remaining > 1 ? 's' : ''} à prendre sur ${total}.`}
+        {remaining === 0
+          ? 'Tout est pris.'
+          : `${remaining} article${remaining > 1 ? 's' : ''} à prendre sur ${total}.`}
       </p>
 
       {list.groups.map((group) => (
         <section key={group.aisle} className="group">
           <h2>{group.aisle}</h2>
-          <ul className="rows checklist">
+          <ul className="checklist">
             {/* Le tri est stable : les articles pris glissent en bas du rayon sans perdre
                 l'ordre alphabétique entre eux. */}
-            {[...group.lines].sort((a, b) => Number(done(a)) - Number(done(b))).map(renderLine)}
+            {[...group.lines]
+              .sort((a, b) => Number(state(a).done) - Number(state(b).done))
+              .map(renderLine)}
           </ul>
         </section>
       ))}
@@ -162,13 +178,11 @@ export default function ShoppingList({
       {list.pantry.length > 0 && (
         <details className="pantry">
           <summary>Supposés en stock ({list.pantry.length})</summary>
-          <ul className="rows">
+          <ul className="pantry-lines">
             {list.pantry.map((line) => (
               <li key={line.key}>
-                <span className="pantry-line">
-                  <span className="check-qty">{formatQty(line.qty, line.unit)}</span>
-                  <span>{line.name}</span>
-                </span>
+                <span className="check-qty">{formatQty(line.qty, line.unit)}</span>
+                <span>{line.name}</span>
               </li>
             ))}
           </ul>
@@ -178,37 +192,75 @@ export default function ShoppingList({
         </details>
       )}
 
-      {adding ? (
-        <form className="extra-form" onSubmit={addExtra}>
-          <input
-            value={extraName}
-            onChange={(e) => setExtraName(e.target.value)}
-            placeholder="Papier toilette, café…"
-            aria-label="Nom de l’article"
-            autoFocus
-          />
-          <select
-            value={extraAisle}
-            onChange={(e) => setExtraAisle(e.target.value as Aisle)}
-            aria-label="Rayon"
-          >
-            {AISLES.map((a) => (
-              <option key={a}>{a}</option>
-            ))}
-          </select>
-          <div className="actions">
-            <button type="button" className="ghost" onClick={() => setAdding(false)}>
-              Annuler
-            </button>
-            <button type="submit" className="primary" disabled={!extraName.trim()}>
-              Ajouter
-            </button>
-          </div>
-        </form>
-      ) : (
+      {!adding ? (
         <button type="button" className="add-extra" onClick={() => setAdding(true)}>
           + Ajouter un article
         </button>
+      ) : pending ? (
+        <div className="extra-form">
+          <p className="pending-name">{pending.name}</p>
+          <div className="pending-qty">
+            <input
+              inputMode="decimal"
+              value={pendingQty}
+              onChange={(e) => setPendingQty(e.target.value)}
+              placeholder="Quantité"
+              aria-label={`Quantité de ${pending.name}`}
+              autoFocus
+            />
+            <span className="item-unit">{pending.unit}</span>
+          </div>
+          <div className="actions">
+            <button type="button" className="ghost" onClick={() => setPending(null)}>
+              Retour
+            </button>
+            <button type="button" className="primary" onClick={addPending}>
+              Ajouter
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="extra-form">
+          {/* On cherche d'abord dans le catalogue : un article ajouté à la main hérite ainsi
+              de son rayon et de son unité, et reste disponible les fois suivantes. */}
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Rechercher un ingrédient…"
+            aria-label="Rechercher un ingrédient"
+            autoFocus
+          />
+          {!!query.trim() && (
+            <ul className="rows suggestions">
+              {matches.map((i) => (
+                <li key={i.id}>
+                  <button type="button" onClick={() => setPending(i)}>
+                    <span className="row-name">{i.name}</span>
+                    <span className="row-meta">{i.unit}</span>
+                  </button>
+                </li>
+              ))}
+              {!exactExists && (
+                <li>
+                  <button type="button" className="create" onClick={() => setCreating(query.trim())}>
+                    + Créer « {query.trim()} »
+                  </button>
+                </li>
+              )}
+            </ul>
+          )}
+          <button
+            type="button"
+            className="ghost"
+            onClick={() => {
+              setAdding(false)
+              setQuery('')
+            }}
+          >
+            Annuler
+          </button>
+        </div>
       )}
 
       <div className="cart-summary">
@@ -216,6 +268,22 @@ export default function ShoppingList({
           Courses terminées
         </button>
       </div>
+
+      {creating !== null && (
+        <IngredientForm
+          initial={null}
+          defaultName={creating}
+          ingredients={ingredients}
+          usedIn={[]}
+          onSave={(ingredient) => {
+            setIngredients([...ingredients, ingredient])
+            setPending(ingredient)
+            setCreating(null)
+          }}
+          onDelete={() => setCreating(null)}
+          onClose={() => setCreating(null)}
+        />
+      )}
 
       {finishing && (
         <Confirm
