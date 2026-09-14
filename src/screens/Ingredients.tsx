@@ -40,6 +40,12 @@ export function IngredientForm({
     // On garde le focus sur le nom à la création : il n'y a rien à lire, seulement à saisir.
     if (initial) dialog.setAttribute('autofocus', '')
     dialog.showModal()
+    if (initial) {
+      // Ceinture et bretelles : l'attribut autofocus sur le <dialog> ne suffit pas partout,
+      // Chrome donne quand même le focus au premier champ et ouvre le clavier. On le reprend.
+      ;(document.activeElement as HTMLElement | null)?.blur()
+      dialog.focus()
+    }
   }, [initial])
 
   const duplicate = ingredients.some((i) => i.id !== initial?.id && norm(i.name) === norm(name))
