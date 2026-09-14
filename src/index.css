@@ -1320,3 +1320,33 @@ dialog.confirm {
 .fab {
   right: max(16px, calc(50% - 280px + 16px));
 }
+
+/* ---------- réglages ---------- */
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.topbar-right .link {
+  width: 40px;
+  font-size: 1.2rem;
+}
+
+.wide {
+  width: 100%;
+  min-height: 50px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.import {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-text);
+}

@@ -42,3 +42,20 @@ export function useObjectUrl(blob?: Blob) {
   useEffect(() => () => void (url && URL.revokeObjectURL(url)), [url])
   return url
 }
+
+/** Une photo doit voyager dans le JSON de sauvegarde : un Blob n'y survit pas. */
+export const blobToDataUrl = (blob: Blob) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(reader.error ?? new Error('Lecture impossible'))
+    reader.readAsDataURL(blob)
+  })
+
+/** Décodage manuel : fetch() sur une data URL est inutilement lourd et dépend du réseau. */
+export function dataUrlToBlob(url: string): Blob {
+  const [head, base64] = url.split(',')
+  const mime = /:(.*?);/.exec(head)?.[1] ?? 'image/jpeg'
+  const binary = atob(base64)
+  return new Blob([Uint8Array.from(binary, (c) => c.charCodeAt(0))], { type: mime })
+}

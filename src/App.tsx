@@ -6,8 +6,11 @@ import { usePersisted } from './domain/store'
 import type { CartEntry, Checked, Extra, Ingredient, Recipe } from './domain/types'
 import Ingredients from './screens/Ingredients'
 import Recipes from './screens/Recipes'
+import Settings from './screens/Settings'
 import ShoppingList from './screens/ShoppingList'
 import { useBackGuard } from './lib/useBackGuard'
+import { dataUrlToBlob } from './lib/photo'
+import type { Backup } from './domain/backup'
 
 const TABS = [
   { id: 'repas', label: 'Repas', glyph: '🍽️' },
@@ -51,6 +54,7 @@ function BackToHome({ onBack }: { onBack: () => void }) {
 
 export default function App() {
   const [tab, setTab] = useState<TabId>('repas')
+  const [settings, setSettings] = useState(false)
   // Catalogue et repas de démonstration servent de valeur initiale : ils s'écrivent au premier
   // lancement et ne réapparaissent jamais ensuite, même si tout est supprimé.
   const [ingredients, setIngredients, ingState] = usePersisted<Ingredient[]>('ingredients', CATALOGUE)
@@ -68,8 +72,17 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <h1>{active.label}</h1>
-        <span className="count">
-          {tab === 'ingredients' ? ingredients.length : tab === 'liste' ? cart.length : recipes.length}
+        <span className="topbar-right">
+          <span className="count">
+            {tab === 'ingredients'
+              ? ingredients.length
+              : tab === 'liste'
+                ? cart.length
+                : recipes.length}
+          </span>
+          <button className="link" onClick={() => setSettings(true)} aria-label="Réglages">
+            ⚙
+          </button>
         </span>
       </header>
 
@@ -111,6 +124,25 @@ export default function App() {
           />
         )}
       </main>
+
+      {settings && (
+        <Settings
+          state={{ ingredients, recipes, cart, extras, checked }}
+          onImport={(backup: Backup) => {
+            // Les photos voyagent en data URL dans le fichier : on les remet en Blob.
+            setRecipes(
+              backup.recipes.map(({ photo, ...rest }) =>
+                photo ? { ...rest, photo: dataUrlToBlob(photo) } : rest,
+              ),
+            )
+            setIngredients(backup.ingredients)
+            setCart(backup.cart)
+            setExtras(backup.extras)
+            setChecked(backup.checked)
+          }}
+          onClose={() => setSettings(false)}
+        />
+      )}
 
       <nav className="tabbar">
         {TABS.map((t) => (
