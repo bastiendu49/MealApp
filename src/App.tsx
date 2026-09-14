@@ -6,6 +6,7 @@ import { usePersisted } from './domain/store'
 import type { Ingredient, Recipe } from './domain/types'
 import Ingredients from './screens/Ingredients'
 import Recipes from './screens/Recipes'
+import { useBackGuard } from './lib/useBackGuard'
 
 const TABS = [
   { id: 'repas', label: 'Repas', glyph: '🍽️' },
@@ -41,6 +42,12 @@ function UpdateBanner() {
   )
 }
 
+/** Depuis un autre onglet, le retour ramène à l'accueil plutôt que de quitter l'application. */
+function BackToHome({ onBack }: { onBack: () => void }) {
+  useBackGuard(onBack)
+  return null
+}
+
 export default function App() {
   const [tab, setTab] = useState<TabId>('repas')
   // Catalogue et repas de démonstration servent de valeur initiale : ils s'écrivent au premier
@@ -59,6 +66,7 @@ export default function App() {
         <span className="count">{tab === 'ingredients' ? ingredients.length : recipes.length}</span>
       </header>
 
+      {tab !== 'repas' && <BackToHome onBack={() => setTab('repas')} />}
       <UpdateBanner />
       {error && <p className="banner error">{error}</p>}
 

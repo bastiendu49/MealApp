@@ -4,6 +4,7 @@ import { formatQty } from '../domain/shoppingList'
 import { uid } from '../domain/store'
 import type { Ingredient, Recipe, RecipeItem } from '../domain/types'
 import { compressPhoto, hueFor, useObjectUrl } from '../lib/photo'
+import { useBackGuard } from '../lib/useBackGuard'
 import { IngredientForm } from './Ingredients'
 
 const norm = (s: string) => slug(s.trim())
@@ -43,6 +44,7 @@ function Confirm({
   onCancel: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
+  useBackGuard(onCancel)
   useEffect(() => {
     const dialog = ref.current
     if (!dialog) return
@@ -93,6 +95,7 @@ function RecipeSheet({
   onClose: () => void
 }) {
   const [tab, setTab] = useState<Tab>('recette')
+  useBackGuard(onClose)
   const photoUrl = useObjectUrl(recipe.photo)
   const byId = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients])
   const steps = stepsOf(recipe)
@@ -236,6 +239,10 @@ function Editor({ initial, focus, ingredients, setIngredients, onSave, onDelete,
 
   // Une recette représente dix minutes de saisie : on ne la jette pas sur un appui malheureux.
   const close = () => (dirty ? setConfirming('close') : onClose())
+
+  // Le retour système d'Android se comporte exactement comme le bouton Annuler, confirmation
+  // comprise : sinon il jetterait une recette en cours de saisie sans rien demander.
+  useBackGuard(close)
 
   const pickPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
