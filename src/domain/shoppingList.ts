@@ -1,4 +1,13 @@
-import { AISLES, isBulk, type Aisle, type CartEntry, type Extra, type Ingredient, type Recipe } from './types'
+import {
+  AISLES,
+  isBulk,
+  type Aisle,
+  type CartEntry,
+  type Checked,
+  type Extra,
+  type Ingredient,
+  type Recipe,
+} from './types'
 
 /** D'où vient une quantité, pour pouvoir déplier une ligne de la liste. */
 export type LineSource = { recipeName: string; qty: number | null }
@@ -114,4 +123,19 @@ export function formatQty(qty: number | null, unit: string): string {
   // 'pièce' → 'pièces', mais 'g' et 'ml' restent invariables.
   const plural = qty > 1 && unit.length > 2 && !unit.endsWith('s') ? `${unit}s` : unit
   return `${trim(qty)} ${plural}`
+}
+
+/**
+ * État d'une ligne vis-à-vis des cases cochées.
+ *
+ * Le cas qui compte : un repas ajouté au panier pendant les courses fait grimper une quantité
+ * déjà prise. Décocher en douce ferait repasser la ligne pour un article qu'on a déjà ; la
+ * laisser barrée ferait rentrer avec 500 g au lieu de 800. On la garde cochée mais signalée,
+ * et elle ne descend pas en bas du rayon.
+ */
+export function lineState(line: Line, checked: Checked) {
+  const isChecked = line.key in checked
+  const at = checked[line.key]
+  const bumped = isChecked && at !== null && at !== undefined && line.qty !== null && line.qty > at
+  return { checked: isChecked, bumped, done: isChecked && !bumped }
 }

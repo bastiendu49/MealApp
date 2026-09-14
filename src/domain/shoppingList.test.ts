@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildShoppingList, formatQty, scaleRecipe } from './shoppingList'
+import { buildShoppingList, formatQty, lineState, scaleRecipe, type Line } from './shoppingList'
 import { CATALOGUE } from '../data/catalogue'
 import { DEMO_RECIPES } from '../data/demoRecipes'
 import type { CartEntry, Ingredient, Recipe } from './types'
@@ -300,5 +300,38 @@ describe('scénario complet sur le catalogue réel', () => {
     expect(formatQty(find('Tomate')!.qty, find('Tomate')!.unit)).toBe('10 pièces')
     expect(formatQty(find('Pâtes')!.qty, find('Pâtes')!.unit)).toBe('400 g')
     expect(formatQty(find('Ail')!.qty, find('Ail')!.unit)).toBe('7 gousses')
+  })
+})
+
+describe('lineState', () => {
+  const at = (qty: number | null): Line => ({
+    key: 'k',
+    name: 'Tomates',
+    qty,
+    unit: 'g',
+    aisle: 'Épicerie',
+    sources: [],
+  })
+
+  it('laisse une ligne non cochée intacte', () => {
+    expect(lineState(at(800), {})).toEqual({ checked: false, bumped: false, done: false })
+  })
+
+  it('marque prise une ligne cochée dont la quantité n’a pas bougé', () => {
+    expect(lineState(at(800), { k: 800 })).toEqual({ checked: true, bumped: false, done: true })
+  })
+
+  it('signale une quantité montée depuis le cochage sans décocher', () => {
+    // Un repas ajouté au panier au milieu des courses : 500 g pris, 800 g nécessaires.
+    expect(lineState(at(800), { k: 500 })).toEqual({ checked: true, bumped: true, done: false })
+  })
+
+  it('ne signale rien quand la quantité a baissé', () => {
+    // On en a déjà assez dans le caddie : rien à faire, la ligne reste barrée.
+    expect(lineState(at(300), { k: 500 })).toEqual({ checked: true, bumped: false, done: true })
+  })
+
+  it('traite « qs » et les articles libres comme simplement pris', () => {
+    expect(lineState(at(null), { k: null })).toEqual({ checked: true, bumped: false, done: true })
   })
 })

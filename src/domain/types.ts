@@ -49,3 +49,10 @@ export type CartEntry = { id: string; recipeId: string; servings: number }
 
 /** Article ajouté à la main, hors recettes. */
 export type Extra = { id: string; name: string; aisle: Aisle }
+
+/**
+ * Articles cochés : clé de ligne -> quantité au moment du cochage.
+ * Mémoriser la quantité permet de signaler qu'elle a augmenté depuis (un repas ajouté au
+ * panier pendant les courses) au lieu de décocher silencieusement une ligne déjà prise.
+ */
+export type Checked = Record<string, number | null>

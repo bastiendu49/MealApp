@@ -3,9 +3,10 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { CATALOGUE } from './data/catalogue'
 import { DEMO_RECIPES } from './data/demoRecipes'
 import { usePersisted } from './domain/store'
-import type { CartEntry, Ingredient, Recipe } from './domain/types'
+import type { CartEntry, Checked, Extra, Ingredient, Recipe } from './domain/types'
 import Ingredients from './screens/Ingredients'
 import Recipes from './screens/Recipes'
+import ShoppingList from './screens/ShoppingList'
 import { useBackGuard } from './lib/useBackGuard'
 
 const TABS = [
@@ -55,16 +56,21 @@ export default function App() {
   const [ingredients, setIngredients, ingState] = usePersisted<Ingredient[]>('ingredients', CATALOGUE)
   const [recipes, setRecipes, recipeState] = usePersisted<Recipe[]>('recipes', DEMO_RECIPES)
   const [cart, setCart, cartState] = usePersisted<CartEntry[]>('cart', [])
+  const [checked, setChecked, checkedState] = usePersisted<Checked>('checked', {})
+  const [extras, setExtras, extrasState] = usePersisted<Extra[]>('extras', [])
 
   const active = TABS.find((t) => t.id === tab)!
-  const error = ingState.error ?? recipeState.error ?? cartState.error
-  const loading = !ingState.loaded || !recipeState.loaded || !cartState.loaded
+  const states = [ingState, recipeState, cartState, checkedState, extrasState]
+  const error = states.find((s) => s.error)?.error ?? null
+  const loading = states.some((s) => !s.loaded)
 
   return (
     <div className="app">
       <header className="topbar">
         <h1>{active.label}</h1>
-        <span className="count">{tab === 'ingredients' ? ingredients.length : recipes.length}</span>
+        <span className="count">
+          {tab === 'ingredients' ? ingredients.length : tab === 'liste' ? cart.length : recipes.length}
+        </span>
       </header>
 
       {tab !== 'repas' && <BackToHome onBack={() => setTab('repas')} />}
@@ -87,7 +93,21 @@ export default function App() {
         ) : tab === 'ingredients' ? (
           <Ingredients ingredients={ingredients} setIngredients={setIngredients} recipes={recipes} />
         ) : (
-          <p className="muted empty">À construire à l’étape suivante.</p>
+          <ShoppingList
+            cart={cart}
+            recipes={recipes}
+            ingredients={ingredients}
+            checked={checked}
+            setChecked={setChecked}
+            extras={extras}
+            setExtras={setExtras}
+            onFinish={() => {
+              setCart([])
+              setChecked({})
+              setExtras([])
+            }}
+            onGoToMeals={() => setTab('repas')}
+          />
         )}
       </main>
 

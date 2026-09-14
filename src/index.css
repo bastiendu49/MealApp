@@ -855,6 +855,11 @@ dialog.confirm {
   padding-bottom: 72px;
 }
 
+/* Même réserve de place sous la liste de courses, sinon la barre masque la fin. */
+.app .screen:has(.cart-summary) {
+  padding-bottom: 148px;
+}
+
 .tile {
   position: relative;
   background: var(--c-surface);
@@ -1048,4 +1053,197 @@ dialog.confirm {
   font-weight: 600;
   color: var(--c-text);
   cursor: pointer;
+}
+
+/* ---------- liste de courses ---------- */
+
+.list-count {
+  margin: 0 0 4px;
+  font-size: 0.9rem;
+}
+
+.checklist li + li {
+  border-top: 1px solid var(--c-border);
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+}
+
+.check-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+  min-height: 54px;
+  padding: 10px 4px 10px 14px;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--c-border);
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.check-main[aria-pressed='true'] .box {
+  background: var(--c-accent);
+  border-color: var(--c-accent);
+}
+
+.check-qty {
+  flex-shrink: 0;
+  min-width: 76px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.check-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Article pris : estompé et barré, et poussé en bas de son rayon par le tri. */
+.checklist .done .check-main {
+  color: var(--c-muted);
+}
+
+.checklist .done .check-name,
+.checklist .done .check-qty {
+  text-decoration: line-through;
+}
+
+.bumped {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--c-accent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.why {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  margin-right: 4px;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  font-size: 1.1rem;
+  color: var(--c-muted);
+  cursor: pointer;
+}
+
+.why[aria-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.sources {
+  margin: 0;
+  padding: 2px 14px 12px 52px;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--c-muted);
+}
+
+.sources li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ---------- fond de placard ---------- */
+
+.pantry {
+  margin-top: 24px;
+}
+
+.pantry summary {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--c-muted);
+  cursor: pointer;
+}
+
+.pantry .rows {
+  margin-top: 4px;
+}
+
+.pantry .rows li + li {
+  border-top: 1px solid var(--c-border);
+}
+
+.pantry-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  color: var(--c-muted);
+}
+
+.pantry .hint {
+  padding: 10px 4px 0;
+}
+
+/* ---------- article libre ---------- */
+
+.add-extra {
+  width: 100%;
+  min-height: 50px;
+  margin-top: 20px;
+  border: 1px dashed var(--c-border);
+  border-radius: var(--r);
+  background: var(--c-surface);
+  font: inherit;
+  font-weight: 600;
+  color: var(--c-accent);
+  cursor: pointer;
+}
+
+.extra-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 14px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r);
+}
+
+.extra-form input,
+.extra-form select {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 1rem;
+  color: var(--c-text);
+  background: var(--c-bg);
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
 }
