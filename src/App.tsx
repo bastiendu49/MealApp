@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useRegisterSW } from 'virtual:pwa-register/react'
 import { CATALOGUE } from './data/catalogue'
 import { usePersisted } from './domain/store'
 import type { Ingredient, Recipe } from './domain/types'
@@ -11,6 +12,32 @@ const TABS = [
 ] as const
 
 type TabId = (typeof TABS)[number]['id']
+
+/**
+ * Le service worker sert l'ancien bundle tant que la page n'a pas été rechargée. Sur téléphone
+ * l'app reste en mémoire des jours : sans ce bandeau, une mise à jour peut ne jamais apparaître.
+ */
+function UpdateBanner() {
+  const {
+    needRefresh: [needRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegisteredSW(_url, registration) {
+      // Le bon moment pour chercher une mise à jour, c'est le retour au premier plan.
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') registration?.update()
+      })
+    },
+  })
+
+  if (!needRefresh) return null
+  return (
+    <div className="banner update">
+      <span>Nouvelle version disponible.</span>
+      <button onClick={() => updateServiceWorker(true)}>Recharger</button>
+    </div>
+  )
+}
 
 /** Panneau de validation de l'étape 0. À supprimer quand le vrai écran Repas arrive. */
 function Diagnostic() {
@@ -60,6 +87,10 @@ function Diagnostic() {
           <dt>Stockage protégé des purges</dt>
           <dd>{persisted === null ? '—' : yes(persisted)}</dd>
         </div>
+        <div>
+          <dt>Version installée</dt>
+          <dd>{__BUILD__}</dd>
+        </div>
       </dl>
     </div>
   )
@@ -83,6 +114,7 @@ export default function App() {
         {tab === 'ingredients' && <span className="count">{ingredients.length}</span>}
       </header>
 
+      <UpdateBanner />
       {error && <p className="banner error">{error}</p>}
 
       <main className="screen">

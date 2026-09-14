@@ -396,3 +396,25 @@ dialog::backdrop {
   border-top: 1px solid var(--c-border);
   padding-top: 16px;
 }
+
+.banner.update {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--c-accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.banner.update button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--c-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
