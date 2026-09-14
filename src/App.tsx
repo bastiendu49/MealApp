@@ -3,7 +3,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { CATALOGUE } from './data/catalogue'
 import { DEMO_RECIPES } from './data/demoRecipes'
 import { usePersisted } from './domain/store'
-import type { Ingredient, Recipe } from './domain/types'
+import type { CartEntry, Ingredient, Recipe } from './domain/types'
 import Ingredients from './screens/Ingredients'
 import Recipes from './screens/Recipes'
 import { useBackGuard } from './lib/useBackGuard'
@@ -54,10 +54,11 @@ export default function App() {
   // lancement et ne réapparaissent jamais ensuite, même si tout est supprimé.
   const [ingredients, setIngredients, ingState] = usePersisted<Ingredient[]>('ingredients', CATALOGUE)
   const [recipes, setRecipes, recipeState] = usePersisted<Recipe[]>('recipes', DEMO_RECIPES)
+  const [cart, setCart, cartState] = usePersisted<CartEntry[]>('cart', [])
 
   const active = TABS.find((t) => t.id === tab)!
-  const error = ingState.error ?? recipeState.error
-  const loading = !ingState.loaded || !recipeState.loaded
+  const error = ingState.error ?? recipeState.error ?? cartState.error
+  const loading = !ingState.loaded || !recipeState.loaded || !cartState.loaded
 
   return (
     <div className="app">
@@ -79,6 +80,9 @@ export default function App() {
             setRecipes={setRecipes}
             ingredients={ingredients}
             setIngredients={setIngredients}
+            cart={cart}
+            setCart={setCart}
+            onSeeList={() => setTab('liste')}
           />
         ) : tab === 'ingredients' ? (
           <Ingredients ingredients={ingredients} setIngredients={setIngredients} recipes={recipes} />
@@ -94,7 +98,10 @@ export default function App() {
             onClick={() => setTab(t.id)}
             aria-current={t.id === tab ? 'page' : undefined}
           >
-            <span className="glyph">{t.glyph}</span>
+            <span className="glyph">
+              {t.glyph}
+              {t.id === 'liste' && cart.length > 0 && <span className="tab-badge">{cart.length}</span>}
+            </span>
             {t.label}
           </button>
         ))}

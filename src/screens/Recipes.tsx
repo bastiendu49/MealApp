@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { slug } from '../data/catalogue'
-import { formatQty } from '../domain/shoppingList'
+import { DEMO_RECIPES } from '../data/demoRecipes'
+import { formatQty, scaleRecipe } from '../domain/shoppingList'
 import { uid } from '../domain/store'
-import type { Ingredient, Recipe, RecipeItem } from '../domain/types'
+import type { CartEntry, Ingredient, Recipe, RecipeItem } from '../domain/types'
 import { compressPhoto, hueFor, useObjectUrl } from '../lib/photo'
 import { useBackGuard } from '../lib/useBackGuard'
 import { IngredientForm } from './Ingredients'
@@ -12,10 +13,9 @@ const norm = (s: string) => slug(s.trim())
 /** Une étape par ligne, lignes vides ignorées. */
 const stepsOf = (recipe: Recipe) => recipe.steps.split('\n').map((s) => s.trim()).filter(Boolean)
 
-/** Vignette d'un repas : la photo, ou son initiale sur une couleur dérivée du nom. */
-export function Thumb({ recipe, big = false }: { recipe: Recipe; big?: boolean }) {
+/** Photo du repas, ou son initiale sur une couleur dérivée du nom. */
+export function Thumb({ recipe, className }: { recipe: Recipe; className: string }) {
   const url = useObjectUrl(recipe.photo)
-  const className = big ? 'thumb big' : 'thumb'
   if (url) return <img className={className} src={url} alt="" />
   return (
     <div
@@ -79,6 +79,20 @@ function Confirm({
   )
 }
 
+function Stepper({ value, onChange }: { value: number; onChange: (n: number) => void }) {
+  return (
+    <div className="stepper">
+      <button type="button" onClick={() => onChange(Math.max(1, value - 1))} aria-label="Moins">
+        −
+      </button>
+      <strong>{value}</strong>
+      <button type="button" onClick={() => onChange(Math.min(50, value + 1))} aria-label="Plus">
+        +
+      </button>
+    </div>
+  )
+}
+
 /* ------------------------------------------------------------------ fiche de présentation */
 
 type Tab = 'recette' | 'ingredients'
@@ -86,19 +100,30 @@ type Tab = 'recette' | 'ingredients'
 function RecipeSheet({
   recipe,
   ingredients,
+  entries,
+  onAdd,
+  onRemove,
   onEdit,
   onClose,
 }: {
   recipe: Recipe
   ingredients: Ingredient[]
+  entries: CartEntry[]
+  onAdd: (servings: number) => void
+  onRemove: (entryId: string) => void
   onEdit: (focus: EditFocus) => void
   onClose: () => void
 }) {
   const [tab, setTab] = useState<Tab>('recette')
+  const [servings, setServings] = useState(recipe.servings)
   useBackGuard(onClose)
-  const photoUrl = useObjectUrl(recipe.photo)
-  const byId = useMemo(() => new Map(ingredients.map((i) => [i.id, i])), [ingredients])
   const steps = stepsOf(recipe)
+
+  // Les quantités affichées suivent le sélecteur de convives : on voit ce qu'on va acheter.
+  const scaled = useMemo(
+    () => scaleRecipe(recipe, servings, ingredients),
+    [recipe, servings, ingredients],
+  )
 
   return (
     <div className="editor">
@@ -120,12 +145,30 @@ function RecipeSheet({
       </header>
 
       <div className="detail">
-        {photoUrl && <img className="hero" src={photoUrl} alt="" />}
+        <Thumb recipe={recipe} className="hero" />
 
         <div className="detail-head">
           <h2>{recipe.name}</h2>
-          <p className="muted">Pour {recipe.servings} personnes</p>
+          <p className="muted">Recette écrite pour {recipe.servings} personnes</p>
         </div>
+
+        {entries.length > 0 && (
+          <ul className="cart-entries">
+            {entries.map((entry) => (
+              <li key={entry.id}>
+                <span>Au panier · {entry.servings} personnes</span>
+                <button
+                  type="button"
+                  className="remove"
+                  onClick={() => onRemove(entry.id)}
+                  aria-label="Retirer du panier"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
 
         <div className="tabs" role="tablist">
           <button
@@ -156,25 +199,36 @@ function RecipeSheet({
               ))}
             </ol>
           )
-        ) : recipe.items.length === 0 ? (
+        ) : scaled.length === 0 ? (
           <p className="muted empty">Aucun ingrédient.</p>
         ) : (
-          <ul className="detail-items">
-            {recipe.items.map((item, i) => {
-              const ingredient = byId.get(item.ingredientId)
-              if (!ingredient) return null
-              return (
-                <li key={`${item.ingredientId}-${i}`}>
-                  <span className="detail-qty">{formatQty(item.qty, ingredient.unit)}</span>
+          <>
+            {servings !== recipe.servings && (
+              <p className="hint">Quantités ajustées pour {servings} personnes.</p>
+            )}
+            <ul className="detail-items">
+              {scaled.map(({ ingredient, qty }, i) => (
+                <li key={`${ingredient.id}-${i}`}>
+                  <span className="detail-qty">{formatQty(qty, ingredient.unit)}</span>
                   <span className="detail-name">
                     {ingredient.name}
                     {ingredient.pantry && <span className="tag">en stock</span>}
                   </span>
                 </li>
-              )
-            })}
-          </ul>
+              ))}
+            </ul>
+          </>
         )}
+      </div>
+
+      <div className="add-bar">
+        <label className="add-servings">
+          <span className="muted">Convives</span>
+          <Stepper value={servings} onChange={setServings} />
+        </label>
+        <button type="button" className="primary" onClick={() => onAdd(servings)}>
+          Ajouter au panier
+        </button>
       </div>
     </div>
   )
@@ -300,15 +354,7 @@ function Editor({ initial, focus, ingredients, setIngredients, onSave, onDelete,
 
           <label>
             Pour combien de personnes ?
-            <div className="stepper">
-              <button type="button" onClick={() => setServings(Math.max(1, servings - 1))}>
-                −
-              </button>
-              <strong>{servings}</strong>
-              <button type="button" onClick={() => setServings(Math.min(50, servings + 1))}>
-                +
-              </button>
-            </div>
+            <Stepper value={servings} onChange={setServings} />
           </label>
 
           <section ref={itemsRef}>
@@ -448,9 +494,20 @@ type Props = {
   setRecipes: (next: Recipe[]) => void
   ingredients: Ingredient[]
   setIngredients: (next: Ingredient[]) => void
+  cart: CartEntry[]
+  setCart: (next: CartEntry[]) => void
+  onSeeList: () => void
 }
 
-export default function Recipes({ recipes, setRecipes, ingredients, setIngredients }: Props) {
+export default function Recipes({
+  recipes,
+  setRecipes,
+  ingredients,
+  setIngredients,
+  cart,
+  setCart,
+  onSeeList,
+}: Props) {
   // On garde l'identifiant plutôt que l'objet : après enregistrement, la fiche doit réafficher
   // la version à jour et non celle capturée à l'ouverture.
   const [viewingId, setViewingId] = useState<string | null>(null)
@@ -458,6 +515,9 @@ export default function Recipes({ recipes, setRecipes, ingredients, setIngredien
   const [editFocus, setEditFocus] = useState<EditFocus>(undefined)
 
   const viewing = recipes.find((r) => r.id === viewingId) ?? null
+  const countOf = (recipeId: string) => cart.filter((e) => e.recipeId === recipeId).length
+  const add = (recipe: Recipe, servings: number) =>
+    setCart([...cart, { id: uid(), recipeId: recipe.id, servings }])
 
   if (editing !== undefined) {
     return (
@@ -474,6 +534,8 @@ export default function Recipes({ recipes, setRecipes, ingredients, setIngredien
         }}
         onDelete={() => {
           setRecipes(recipes.filter((r) => r.id !== editing!.id))
+          // Un repas supprimé ne doit pas rester au panier : il y deviendrait invisible.
+          setCart(cart.filter((e) => e.recipeId !== editing!.id))
           setViewingId(null)
           setEditing(undefined)
         }}
@@ -487,6 +549,9 @@ export default function Recipes({ recipes, setRecipes, ingredients, setIngredien
       <RecipeSheet
         recipe={viewing}
         ingredients={ingredients}
+        entries={cart.filter((e) => e.recipeId === viewing.id)}
+        onAdd={(servings) => add(viewing, servings)}
+        onRemove={(entryId) => setCart(cart.filter((e) => e.id !== entryId))}
         onEdit={(focus) => {
           setEditFocus(focus)
           setEditing(viewing)
@@ -501,23 +566,41 @@ export default function Recipes({ recipes, setRecipes, ingredients, setIngredien
   return (
     <>
       {sorted.length === 0 ? (
-        <p className="muted empty">Aucun repas. Appuie sur + pour en créer un.</p>
+        <div className="empty">
+          <p className="muted">Aucun repas. Appuie sur + pour en créer un.</p>
+          {/* Proposé plutôt qu'imposé : les repas d'exemple ne réapparaissent jamais tout seuls
+              après une suppression, il faut venir les demander ici. */}
+          <button type="button" className="ghost" onClick={() => setRecipes(DEMO_RECIPES)}>
+            Charger 2 repas d’exemple
+          </button>
+        </div>
       ) : (
-        <ul className="rows">
-          {sorted.map((recipe) => (
-            <li key={recipe.id}>
-              <button onClick={() => setViewingId(recipe.id)}>
-                <Thumb recipe={recipe} />
-                <span className="row-name">{recipe.name}</span>
-                <span className="row-meta">{recipe.servings} pers.</span>
-              </button>
-            </li>
-          ))}
+        <ul className={cart.length > 0 ? 'grid with-summary' : 'grid'}>
+          {sorted.map((recipe) => {
+            const count = countOf(recipe.id)
+            return (
+              <li key={recipe.id} className="tile">
+                <button className="tile-main" onClick={() => setViewingId(recipe.id)}>
+                  <Thumb recipe={recipe} className="tile-photo" />
+                  <span className="tile-name">{recipe.name}</span>
+                  <span className="tile-meta">{recipe.servings} pers.</span>
+                </button>
+                {count > 0 && <span className="tile-badge">×{count}</span>}
+                <button
+                  className="tile-add"
+                  onClick={() => add(recipe, recipe.servings)}
+                  aria-label={`Ajouter ${recipe.name} au panier`}
+                >
+                  +
+                </button>
+              </li>
+            )
+          })}
         </ul>
       )}
 
       <button
-        className="fab"
+        className={cart.length > 0 ? 'fab raised' : 'fab'}
         onClick={() => {
           setEditFocus(undefined)
           setEditing(null)
@@ -526,6 +609,17 @@ export default function Recipes({ recipes, setRecipes, ingredients, setIngredien
       >
         +
       </button>
+
+      {cart.length > 0 && (
+        <div className="cart-summary">
+          <button type="button" className="link" onClick={() => setCart([])}>
+            Vider
+          </button>
+          <button type="button" className="primary" onClick={onSeeList}>
+            {cart.length} repas · Liste de courses
+          </button>
+        </div>
+      )}
 
       <p className="version muted">Mes Repas · version {__BUILD__}</p>
     </>

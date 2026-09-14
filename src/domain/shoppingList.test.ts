@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildShoppingList, formatQty, scaleRecipe } from './shoppingList'
+import { CATALOGUE } from '../data/catalogue'
+import { DEMO_RECIPES } from '../data/demoRecipes'
 import type { CartEntry, Ingredient, Recipe } from './types'
 
 const ing = (id: string, over: Partial<Ingredient> = {}): Ingredient => ({
@@ -227,5 +229,76 @@ describe('scaleRecipe', () => {
       { ingredient: ingredients[0], qty: 125 },
       { ingredient: ingredients[1], qty: null },
     ])
+  })
+})
+
+describe('scénario complet sur le catalogue réel', () => {
+  // Panier : ratatouille pour 4, bolognaise pour 4, et de nouveau ratatouille pour 6.
+  // Les deux recettes partagent oignon, ail, huile d'olive, sel et poivre : c'est exactement
+  // le cas où une erreur d'agrégation se voit au magasin et nulle part ailleurs.
+  const cartOf = (...entries: [string, number][]) =>
+    entries.map(([recipeId, servings], i) => ({ id: `e${i}`, recipeId, servings }))
+
+  const list = buildShoppingList({
+    cart: cartOf(['demo-ratatouille', 4], ['demo-bolognaise', 4], ['demo-ratatouille', 6]),
+    recipes: DEMO_RECIPES,
+    ingredients: CATALOGUE,
+  })
+
+  const find = (name: string) => list.groups.flatMap((g) => g.lines).find((l) => l.name === name)
+
+  it('additionne les ingrédients communs aux deux recettes', () => {
+    // Oignon : 1 + 1 + 1,5 = 3,5 -> on en achète 4, on ne coupe pas un oignon en deux au magasin.
+    expect(find('Oignon')?.qty).toBe(4)
+    expect(find('Ail')?.qty).toBe(7) // 2 + 2 + 3 gousses
+  })
+
+  it('met à l’échelle le repas pris pour 6 personnes', () => {
+    expect(find('Tomate')?.qty).toBe(10) // 4 + 6
+    expect(find('Courgette')?.qty).toBe(5) // 2 + 3
+    expect(find('Aubergine')?.qty).toBe(3) // 1 + 1,5 arrondi au supérieur
+  })
+
+  it('laisse intactes les quantités des ingrédients non partagés', () => {
+    expect(find('Pâtes')?.qty).toBe(400)
+    expect(find('Steak haché')?.qty).toBe(400)
+    expect(find('Tomates concassées')?.qty).toBe(1)
+    expect(find('Parmesan')?.qty).toBe(60)
+  })
+
+  it('sort du panier tout ce qui est en fond de placard', () => {
+    expect(find("Huile d'olive")).toBeUndefined()
+    expect(list.pantry.map((l) => l.name).sort()).toEqual([
+      'Herbes de Provence',
+      "Huile d'olive",
+      'Poivre',
+      'Sel',
+      'Thym',
+    ])
+    // L'huile reste chiffrée dans la section placard : 40 + 20 + 60 ml.
+    expect(list.pantry.find((l) => l.name === "Huile d'olive")?.qty).toBe(120)
+  })
+
+  it('range les rayons dans l’ordre de traversée du magasin', () => {
+    expect(list.groups.map((g) => g.aisle)).toEqual([
+      'Fruits & légumes',
+      'Boucherie & poissonnerie',
+      'Crèmerie',
+      'Épicerie',
+    ])
+  })
+
+  it('garde la trace des trois origines de l’oignon', () => {
+    expect(find('Oignon')?.sources).toEqual([
+      { recipeName: 'Ratatouille', qty: 1 },
+      { recipeName: 'Pâtes à la bolognaise', qty: 1 },
+      { recipeName: 'Ratatouille', qty: 1.5 },
+    ])
+  })
+
+  it('affiche des quantités lisibles en rayon', () => {
+    expect(formatQty(find('Tomate')!.qty, find('Tomate')!.unit)).toBe('10 pièces')
+    expect(formatQty(find('Pâtes')!.qty, find('Pâtes')!.unit)).toBe('400 g')
+    expect(formatQty(find('Ail')!.qty, find('Ail')!.unit)).toBe('7 gousses')
   })
 })
