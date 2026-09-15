@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { BACKUP_VERSION, parseBackup } from './backup'
 import { CATALOGUE } from '../data/catalogue'
-import { DEMO_RECIPES } from '../data/demoRecipes'
+import { BASE_RECIPES } from '../data/baseRecipes'
 
 /** Sauvegarde minimale valide, que chaque test dégrade sur un point précis. */
 const valid = {
@@ -144,7 +144,7 @@ describe('aller-retour export puis import', () => {
       version: BACKUP_VERSION,
       exportedAt: new Date().toISOString(),
       ingredients: CATALOGUE,
-      recipes: DEMO_RECIPES,
+      recipes: BASE_RECIPES,
       cart: [{ id: 'c1', recipeId: 'demo-ratatouille', servings: 6 }],
       extras: [{ id: 'x1', ingredientId: 'cafe', qty: null }],
       checked: { tomate: 10, sel: null },
@@ -152,8 +152,8 @@ describe('aller-retour export puis import', () => {
 
     const data = ok(parseBackup(JSON.stringify(exported)))
     expect(data.ingredients).toEqual(CATALOGUE)
-    expect(data.recipes.map((r) => r.name)).toEqual(DEMO_RECIPES.map((r) => r.name))
-    expect(data.recipes[0].items).toEqual(DEMO_RECIPES[0].items)
+    expect(data.recipes.map((r) => r.name)).toEqual(BASE_RECIPES.map((r) => r.name))
+    expect(data.recipes[0].items).toEqual(BASE_RECIPES[0].items)
     expect(data.cart).toEqual(exported.cart)
     expect(data.extras).toEqual(exported.extras)
     expect(data.checked).toEqual(exported.checked)

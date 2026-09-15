@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { CATALOGUE } from './data/catalogue'
-import { DEMO_RECIPES } from './data/demoRecipes'
+import { BASE_RECIPES, mergeBaseRecipes } from './data/baseRecipes'
 import { usePersisted } from './domain/store'
 import type { CartEntry, Checked, Extra, Ingredient, Recipe } from './domain/types'
 import Ingredients from './screens/Ingredients'
@@ -58,10 +58,17 @@ export default function App() {
   // Catalogue et repas de démonstration servent de valeur initiale : ils s'écrivent au premier
   // lancement et ne réapparaissent jamais ensuite, même si tout est supprimé.
   const [ingredients, setIngredients, ingState] = usePersisted<Ingredient[]>('ingredients', CATALOGUE)
-  const [recipes, setRecipes, recipeState] = usePersisted<Recipe[]>('recipes', DEMO_RECIPES)
+  const [recipes, setRecipes, recipeState] = usePersisted<Recipe[]>('recipes', BASE_RECIPES)
   const [cart, setCart, cartState] = usePersisted<CartEntry[]>('cart', [])
   const [checked, setChecked, checkedState] = usePersisted<Checked>('checked', {})
   const [extras, setExtras, extrasState] = usePersisted<Extra[]>('extras', [])
+
+  /** Complète l'existant avec les recettes fournies, et avec les ingrédients qui leur manquent. */
+  const loadBase = () => {
+    const merged = mergeBaseRecipes({ recipes, ingredients })
+    setIngredients(merged.ingredients)
+    setRecipes(merged.recipes)
+  }
 
   const active = TABS.find((t) => t.id === tab)!
   const states = [ingState, recipeState, cartState, checkedState, extrasState]
@@ -102,6 +109,7 @@ export default function App() {
             cart={cart}
             setCart={setCart}
             onSeeList={() => setTab('liste')}
+            onLoadBase={loadBase}
           />
         ) : tab === 'ingredients' ? (
           <Ingredients ingredients={ingredients} setIngredients={setIngredients} recipes={recipes} />
@@ -128,6 +136,7 @@ export default function App() {
       {settings && (
         <Settings
           state={{ ingredients, recipes, cart, extras, checked }}
+          onLoadBase={loadBase}
           onImport={(backup: Backup) => {
             // Les photos voyagent en data URL dans le fichier : on les remet en Blob.
             setRecipes(

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { slug } from '../data/catalogue'
-import { DEMO_RECIPES } from '../data/demoRecipes'
 import { formatQty, scaleRecipe } from '../domain/shoppingList'
 import { uid } from '../domain/store'
 import type { CartEntry, Ingredient, Recipe, RecipeItem } from '../domain/types'
@@ -446,6 +445,7 @@ type Props = {
   cart: CartEntry[]
   setCart: (next: CartEntry[]) => void
   onSeeList: () => void
+  onLoadBase: () => void
 }
 
 export default function Recipes({
@@ -456,6 +456,7 @@ export default function Recipes({
   cart,
   setCart,
   onSeeList,
+  onLoadBase,
 }: Props) {
   // On garde l'identifiant plutôt que l'objet : après enregistrement, la fiche doit réafficher
   // la version à jour et non celle capturée à l'ouverture.
@@ -517,10 +518,10 @@ export default function Recipes({
       {sorted.length === 0 ? (
         <div className="empty">
           <p className="muted">Aucun repas. Appuie sur + pour en créer un.</p>
-          {/* Proposé plutôt qu'imposé : les repas d'exemple ne réapparaissent jamais tout seuls
-              après une suppression, il faut venir les demander ici. */}
-          <button type="button" className="ghost" onClick={() => setRecipes(DEMO_RECIPES)}>
-            Charger 2 repas d’exemple
+          {/* Proposé plutôt qu'imposé : les recettes fournies ne réapparaissent jamais toutes
+              seules après une suppression, il faut venir les demander ici. */}
+          <button type="button" className="ghost" onClick={onLoadBase}>
+            Charger les recettes fournies
           </button>
         </div>
       ) : (

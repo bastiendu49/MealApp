@@ -1,0 +1,292 @@
+import type { Ingredient, Recipe } from '../domain/types'
+import { CATALOGUE } from './catalogue'
+
+/** Une étape par ligne : le champ `steps` est du texte libre, numéroté à l'affichage. */
+const steps = (...lines: string[]) => lines.join('\n')
+
+/**
+ * Recettes fournies avec l'application. Ce sont des versions maison de plats classiques,
+ * écrites pour deux personnes (quatre pour la quiche) : le sélecteur de convives fait le reste.
+ * Les identifiants d'ingrédients viennent du catalogue et sont vérifiés par un test — une faute
+ * de frappe ferait disparaître l'ingrédient de la liste de courses sans le moindre message.
+ */
+export const BASE_RECIPES: Recipe[] = [
+  {
+    id: 'base-tartelette-pesto',
+    name: 'Tartelette pesto, tomates & salade',
+    servings: 2,
+    items: [
+      { ingredientId: 'pate-brisee', qty: 1 },
+      { ingredientId: 'pesto', qty: 60 },
+      { ingredientId: 'tomate', qty: 3 },
+      { ingredientId: 'mozzarella', qty: 1 },
+      { ingredientId: 'salade-verte', qty: 1 },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'vinaigre-balsamique', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Dérouler la pâte brisée, y découper deux disques et les poser sur une plaque.',
+      'Piquer le fond à la fourchette, puis étaler le pesto en laissant un centimètre de bord.',
+      'Couper tomates et mozzarella en rondelles, les répartir en les alternant.',
+      "Saler, poivrer, arroser d'un filet d'huile d'olive.",
+      'Enfourner 25 minutes, jusqu’à ce que les bords soient dorés.',
+      'Assaisonner la salade au vinaigre balsamique et servir à côté.',
+    ),
+  },
+  {
+    id: 'base-poulet-mafe',
+    name: 'Poulet façon mafé & riz',
+    servings: 2,
+    items: [
+      { ingredientId: 'blanc-de-poulet', qty: 2 },
+      { ingredientId: 'beurre-de-cacahuete', qty: 60 },
+      { ingredientId: 'concentre-de-tomate', qty: 30 },
+      { ingredientId: 'oignon', qty: 1 },
+      { ingredientId: 'ail', qty: 2 },
+      { ingredientId: 'patate-douce', qty: 1 },
+      { ingredientId: 'carotte', qty: 2 },
+      { ingredientId: 'riz', qty: 150 },
+      { ingredientId: 'bouillon-cube', qty: 1 },
+      { ingredientId: 'huile-de-tournesol', qty: null },
+      { ingredientId: 'piment', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Couper le poulet en gros cubes, émincer l’oignon et l’ail.',
+      'Peler la patate douce et les carottes, les couper en morceaux réguliers.',
+      'Faire dorer le poulet à feu vif dans un filet d’huile, puis le réserver.',
+      'Faire revenir l’oignon et l’ail 5 minutes, ajouter le concentré de tomate et le laisser torréfier 1 minute.',
+      'Délayer le beurre de cacahuète dans 40 cl d’eau chaude avec le bouillon cube, verser dans la cocotte.',
+      'Remettre le poulet, ajouter les légumes, saler, poivrer, pimenter.',
+      'Couvrir et laisser mijoter 35 minutes à feu doux : les légumes doivent être fondants et la sauce nappante.',
+      'Cuire le riz pendant ce temps et servir le mafé dessus.',
+    ),
+  },
+  {
+    id: 'base-poulet-caprese',
+    name: 'One pan poulet caprese',
+    servings: 2,
+    items: [
+      { ingredientId: 'blanc-de-poulet', qty: 2 },
+      { ingredientId: 'tomate-cerise', qty: 250 },
+      { ingredientId: 'mozzarella', qty: 1 },
+      { ingredientId: 'basilic', qty: 1 },
+      { ingredientId: 'ail', qty: 2 },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'vinaigre-balsamique', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Poser les blancs de poulet dans un plat, saler, poivrer, arroser d’huile d’olive.',
+      'Ajouter les tomates cerises entières et les gousses d’ail écrasées en chemise.',
+      'Enfourner 20 minutes.',
+      'Sortir le plat et déposer la mozzarella en tranches sur le poulet.',
+      'Remettre 5 minutes, le temps qu’elle fonde.',
+      'Parsemer de basilic frais et donner un trait de vinaigre balsamique avant de servir.',
+    ),
+  },
+  {
+    id: 'base-poulet-tandoori',
+    name: 'Poulet tandoori',
+    servings: 2,
+    items: [
+      { ingredientId: 'blanc-de-poulet', qty: 2 },
+      { ingredientId: 'yaourt-nature', qty: 2 },
+      { ingredientId: 'epices-tandoori', qty: 20 },
+      { ingredientId: 'citron', qty: 1 },
+      { ingredientId: 'ail', qty: 2 },
+      { ingredientId: 'gingembre-frais', qty: 20 },
+      { ingredientId: 'riz', qty: 150 },
+      { ingredientId: 'coriandre', qty: 1 },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Mélanger les yaourts, les épices tandoori, l’ail et le gingembre râpés, le jus d’un demi-citron, du sel et du poivre.',
+      'Couper le poulet en gros morceaux et le faire mariner au moins 30 minutes dans ce mélange — une nuit, c’est nettement mieux.',
+      'Préchauffer le four à 220 °C.',
+      'Étaler les morceaux sur une plaque sans les superposer, sinon ils cuisent à la vapeur au lieu de colorer.',
+      'Enfourner 20 minutes, jusqu’à ce que les bords soient légèrement brûlés.',
+      'Cuire le riz pendant ce temps.',
+      'Parsemer de coriandre et servir avec le reste du citron en quartiers.',
+    ),
+  },
+  {
+    id: 'base-tartelette-chevre-miel',
+    name: 'Tartelette chèvre miel & salade',
+    servings: 2,
+    items: [
+      { ingredientId: 'pate-brisee', qty: 1 },
+      { ingredientId: 'buche-de-chevre', qty: 100 },
+      { ingredientId: 'noix', qty: 30 },
+      { ingredientId: 'salade-verte', qty: 1 },
+      { ingredientId: 'miel', qty: null },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'vinaigre-balsamique', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Découper deux disques dans la pâte brisée et les déposer sur une plaque.',
+      'Piquer le fond à la fourchette, répartir le chèvre en rondelles.',
+      'Concasser les noix, les parsemer, poivrer et arroser de miel.',
+      'Enfourner 20 minutes, jusqu’à ce que le chèvre soit doré.',
+      'Assaisonner la salade et servir les tartelettes tièdes dessus.',
+    ),
+  },
+  {
+    id: 'base-galette-complete',
+    name: 'Galette complète',
+    servings: 2,
+    items: [
+      { ingredientId: 'galette-de-sarrasin', qty: 4 },
+      { ingredientId: 'jambon-blanc', qty: 4 },
+      { ingredientId: 'gruyere-rape', qty: 80 },
+      { ingredientId: 'uf', qty: 4 },
+      { ingredientId: 'beurre', qty: 20 },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Chauffer une poêle et y déposer une galette avec une noisette de beurre.',
+      'Parsemer de gruyère râpé au centre et laisser fondre 1 minute.',
+      'Casser un œuf au milieu et poser une tranche de jambon à côté.',
+      'Couvrir et laisser cuire 3 minutes : le blanc doit être pris, le jaune encore coulant.',
+      'Replier les quatre bords vers le centre pour former un carré.',
+      'Saler, poivrer, servir aussitôt et recommencer pour les autres galettes.',
+    ),
+  },
+  {
+    id: 'base-feuillete-epinard-feta',
+    name: 'Feuilletés épinard, feta & salade',
+    servings: 2,
+    items: [
+      { ingredientId: 'pate-feuilletee', qty: 1 },
+      { ingredientId: 'epinard-frais', qty: 200 },
+      { ingredientId: 'feta', qty: 100 },
+      { ingredientId: 'oignon', qty: 1 },
+      { ingredientId: 'uf', qty: 1 },
+      { ingredientId: 'salade-verte', qty: 1 },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'muscade', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Émincer l’oignon et le faire suer dans un filet d’huile d’olive.',
+      'Ajouter les épinards, les laisser tomber 3 minutes, puis bien les égoutter en pressant — sinon la pâte détrempe.',
+      'Hors du feu, émietter la feta dedans, râper un peu de muscade, poivrer. Ne pas saler : la feta s’en charge.',
+      'Découper la pâte feuilletée en quatre rectangles, garnir une moitié de chacun et refermer en chausson.',
+      'Souder les bords à la fourchette et dorer au jaune d’œuf battu.',
+      'Enfourner 25 minutes, jusqu’à ce que les feuilletés soient bien dorés.',
+      'Servir avec la salade assaisonnée.',
+    ),
+  },
+  {
+    id: 'base-feuillete-chevre-miel',
+    name: 'Feuilleté chèvre miel & salade',
+    servings: 2,
+    items: [
+      { ingredientId: 'pate-feuilletee', qty: 1 },
+      { ingredientId: 'buche-de-chevre', qty: 100 },
+      { ingredientId: 'noix', qty: 30 },
+      { ingredientId: 'uf', qty: 1 },
+      { ingredientId: 'salade-verte', qty: 1 },
+      { ingredientId: 'miel', qty: null },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'vinaigre-balsamique', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Découper la pâte feuilletée en quatre rectangles.',
+      'Déposer des rondelles de chèvre sur une moitié, arroser de miel, parsemer de noix concassées.',
+      'Poivrer, refermer en chausson et souder les bords à la fourchette.',
+      'Dorer au jaune d’œuf battu et entailler le dessus pour laisser la vapeur s’échapper.',
+      'Enfourner 25 minutes.',
+      'Servir tiède avec la salade assaisonnée à l’huile d’olive et au vinaigre balsamique.',
+    ),
+  },
+  {
+    id: 'base-quiche-lorraine',
+    name: 'Quiche lorraine',
+    servings: 4,
+    items: [
+      { ingredientId: 'pate-brisee', qty: 1 },
+      { ingredientId: 'lardons', qty: 200 },
+      { ingredientId: 'uf', qty: 3 },
+      { ingredientId: 'creme-liquide', qty: 200 },
+      { ingredientId: 'lait', qty: 100 },
+      { ingredientId: 'gruyere-rape', qty: 80 },
+      { ingredientId: 'muscade', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 190 °C.',
+      'Étaler la pâte brisée dans un moule et piquer le fond à la fourchette.',
+      'Faire revenir les lardons à sec 5 minutes, les égoutter et les répartir sur la pâte.',
+      'Battre les œufs avec la crème et le lait, poivrer, râper de la muscade. Saler très peu : les lardons salent déjà.',
+      'Verser l’appareil et parsemer de gruyère râpé.',
+      'Enfourner 35 minutes : la quiche doit être dorée et encore tremblotante au centre.',
+      'Laisser tiédir 10 minutes avant de découper, sinon elle s’effondre.',
+    ),
+  },
+  {
+    id: 'base-poulet-grecque',
+    name: 'One pan poulet à la grecque',
+    servings: 2,
+    items: [
+      { ingredientId: 'cuisse-de-poulet', qty: 2 },
+      { ingredientId: 'pomme-de-terre', qty: 400 },
+      { ingredientId: 'oignon-rouge', qty: 1 },
+      { ingredientId: 'citron', qty: 1 },
+      { ingredientId: 'olives-noires', qty: 80 },
+      { ingredientId: 'feta', qty: 80 },
+      { ingredientId: 'ail', qty: 3 },
+      { ingredientId: 'origan', qty: null },
+      { ingredientId: 'huile-d-olive', qty: null },
+      { ingredientId: 'sel', qty: null },
+      { ingredientId: 'poivre', qty: null },
+    ],
+    steps: steps(
+      'Préchauffer le four à 200 °C.',
+      'Couper les pommes de terre en quartiers et l’oignon rouge en lamelles épaisses.',
+      'Tout réunir dans un plat avec l’ail en chemise, le jus d’un demi-citron, l’origan, l’huile d’olive, sel et poivre.',
+      'Poser les cuisses de poulet dessus, peau vers le haut, et les saler.',
+      'Enfourner 45 minutes en arrosant à mi-cuisson avec le jus du plat.',
+      'Ajouter les olives et la feta émiettée, remettre 5 minutes.',
+      'Servir avec le reste du citron en quartiers.',
+    ),
+  },
+]
+
+/**
+ * Ajoute les recettes de base à ce qui existe déjà, sans rien écraser.
+ *
+ * Ramène aussi les ingrédients du catalogue qu'elles utilisent et qui manquent : ceux ajoutés
+ * au catalogue après la première installation ne sont jamais semés, et une recette qui
+ * référence un ingrédient absent perd la ligne en silence dans la liste de courses.
+ */
+export function mergeBaseRecipes(current: { recipes: Recipe[]; ingredients: Ingredient[] }) {
+  const knownRecipes = new Set(current.recipes.map((r) => r.id))
+  const knownIngredients = new Set(current.ingredients.map((i) => i.id))
+  const needed = new Set(BASE_RECIPES.flatMap((r) => r.items.map((i) => i.ingredientId)))
+
+  return {
+    recipes: [...current.recipes, ...BASE_RECIPES.filter((r) => !knownRecipes.has(r.id))],
+    ingredients: [
+      ...current.ingredients,
+      ...CATALOGUE.filter((i) => needed.has(i.id) && !knownIngredients.has(i.id)),
+    ],
+  }
+}

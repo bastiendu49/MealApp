@@ -16,10 +16,12 @@ type State = {
 export default function Settings({
   state,
   onImport,
+  onLoadBase,
   onClose,
 }: {
   state: State
   onImport: (backup: Backup) => void
+  onLoadBase: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -139,6 +141,14 @@ export default function Settings({
           Importer une sauvegarde
           <input type="file" accept="application/json,.json" onChange={pickFile} hidden />
         </label>
+
+        <button type="button" className="ghost wide" onClick={onLoadBase}>
+          Ajouter les recettes fournies
+        </button>
+        <p className="hint">
+          N’écrase rien : seules les recettes fournies que tu n’as pas déjà sont ajoutées, avec
+          les ingrédients qui leur manquent.
+        </p>
 
         {error && <p className="error">{error}</p>}
 
