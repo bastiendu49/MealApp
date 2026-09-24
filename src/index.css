@@ -1350,3 +1350,12 @@ dialog.confirm {
   justify-content: center;
   color: var(--c-text);
 }
+
+/* Rayon entièrement pris : estompé et renvoyé en bas de la liste. */
+.aisle-done h2 {
+  opacity: 0.55;
+}
+
+.aisle-done .checklist {
+  opacity: 0.6;
+}

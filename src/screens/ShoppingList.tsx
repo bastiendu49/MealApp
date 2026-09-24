@@ -143,27 +143,37 @@ export default function ShoppingList({
     : []
   const exactExists = ingredients.some((i) => norm(i.name) === q)
 
-  if (cart.length === 0 && extras.length === 0) {
-    return (
-      <div className="empty">
-        <p className="muted">Aucun repas sélectionné.</p>
-        <button type="button" onClick={onGoToMeals}>
-          Choisir des repas
-        </button>
-      </div>
-    )
-  }
+  // Un rayon entièrement pris passe en bas : le haut de l'écran ne montre alors que les rayons
+  // où il reste quelque chose à prendre. Le tri est stable, l'ordre de traversée du magasin est
+  // donc conservé à l'intérieur de chacun des deux blocs.
+  const groups = [...list.groups].sort(
+    (a, b) => Number(a.lines.every((l) => state(l).done)) - Number(b.lines.every((l) => state(l).done)),
+  )
 
   return (
     <>
-      <p className="list-count muted">
-        {remaining === 0
-          ? 'Tout est pris.'
-          : `${remaining} article${remaining > 1 ? 's' : ''} à prendre sur ${total}.`}
-      </p>
+      {total === 0 ? (
+        // Pas d'écran bloquant : on doit pouvoir noter « café, papier toilette » sans avoir
+        // choisi le moindre repas.
+        <div className="empty">
+          <p className="muted">Ta liste est vide.</p>
+          <button type="button" onClick={onGoToMeals}>
+            Choisir des repas
+          </button>
+        </div>
+      ) : (
+        <p className="list-count muted">
+          {remaining === 0
+            ? 'Tout est pris.'
+            : `${remaining} article${remaining > 1 ? 's' : ''} à prendre sur ${total}.`}
+        </p>
+      )}
 
-      {list.groups.map((group) => (
-        <section key={group.aisle} className="group">
+      {groups.map((group) => (
+        <section
+          key={group.aisle}
+          className={group.lines.every((l) => state(l).done) ? 'group aisle-done' : 'group'}
+        >
           <h2>{group.aisle}</h2>
           <ul className="checklist">
             {/* Le tri est stable : les articles pris glissent en bas du rayon sans perdre
@@ -263,11 +273,13 @@ export default function ShoppingList({
         </div>
       )}
 
-      <div className="cart-summary">
-        <button type="button" className="primary" onClick={() => setFinishing(true)}>
-          Courses terminées
-        </button>
-      </div>
+      {total > 0 && (
+        <div className="cart-summary">
+          <button type="button" className="primary" onClick={() => setFinishing(true)}>
+            Courses terminées
+          </button>
+        </div>
+      )}
 
       {creating !== null && (
         <IngredientForm
