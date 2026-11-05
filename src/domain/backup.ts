@@ -1,5 +1,9 @@
 import {
   AISLES,
+  COURSES,
+  DIFFICULTIES,
+  MAINS,
+  PRICES,
   type Aisle,
   type CartEntry,
   type Checked,
@@ -8,11 +12,19 @@ import {
   type Recipe,
 } from './types'
 
-/** Format du fichier de sauvegarde. Les photos y voyagent en data URL : le JSON reste un
- *  fichier unique qu'on peut envoyer par mail ou déposer sur un cloud. */
+/**
+ * Format du fichier de sauvegarde. Les photos y voyagent en data URL : le JSON reste un
+ * fichier unique qu'on peut envoyer par mail ou déposer sur un cloud.
+ *
+ * v2 : métadonnées des recettes (temps, prix…) et favoris. Seules les recettes stockées sur
+ * le téléphone y figurent (créées ou modifiées par l'utilisateur) : la bibliothèque est dans
+ * le code. Un fichier v1 reste importable.
+ */
 export type Backup = {
-  version: 1
+  version: 2
   exportedAt: string
+  /** Absent d'un fichier v1 : on garde alors les favoris actuels plutôt que de les vider. */
+  favorites?: string[]
   ingredients: Ingredient[]
   recipes: (Omit<Recipe, 'photo'> & { photo?: string })[]
   cart: CartEntry[]
@@ -20,7 +32,10 @@ export type Backup = {
   checked: Checked
 }
 
-export const BACKUP_VERSION = 1
+export const BACKUP_VERSION = 2
+
+/** Versions que l'import sait relire. */
+const READABLE = [1, 2]
 
 type Result = { ok: true; data: Backup } | { ok: false; error: string }
 
@@ -47,7 +62,7 @@ export function parseBackup(text: string): Result {
     return { ok: false, error: 'Ce fichier n’est pas un JSON valide.' }
   }
   if (!isObject(raw)) return { ok: false, error: 'Fichier de sauvegarde illisible.' }
-  if (raw.version !== BACKUP_VERSION) {
+  if (!READABLE.includes(raw.version as number)) {
     return { ok: false, error: `Version de sauvegarde non reconnue (attendu ${BACKUP_VERSION}).` }
   }
   if (!Array.isArray(raw.ingredients) || !Array.isArray(raw.recipes)) {
@@ -103,6 +118,7 @@ export function parseBackup(text: string): Result {
       servings,
       steps: typeof entry.steps === 'string' ? entry.steps : '',
       items,
+      ...metadata(entry),
       ...(typeof entry.photo === 'string' && entry.photo.startsWith('data:')
         ? { photo: entry.photo }
         : {}),
@@ -135,6 +151,10 @@ export function parseBackup(text: string): Result {
       })
     : []
 
+  const favorites = Array.isArray(raw.favorites)
+    ? raw.favorites.filter((f): f is string => typeof f === 'string' && !!f)
+    : undefined
+
   const checked: Checked = {}
   if (isObject(raw.checked)) {
     for (const [key, value] of Object.entries(raw.checked)) {
@@ -153,6 +173,24 @@ export function parseBackup(text: string): Result {
       cart,
       extras,
       checked,
+      ...(favorites ? { favorites } : {}),
     },
   }
+}
+
+/** Métadonnées facultatives : une valeur inconnue est ignorée, jamais une cause de refus. */
+type Metadata = Partial<Pick<Recipe, 'course' | 'main' | 'minutes' | 'difficulty' | 'price' | 'emoji'>>
+
+function metadata(entry: Record<string, unknown>): Metadata {
+  const out: Metadata = {}
+  if (COURSES.includes(entry.course as never)) out.course = entry.course as Recipe['course']
+  if (MAINS.includes(entry.main as never)) out.main = entry.main as Recipe['main']
+  if (DIFFICULTIES.includes(entry.difficulty as never)) {
+    out.difficulty = entry.difficulty as Recipe['difficulty']
+  }
+  if (PRICES.includes(entry.price as never)) out.price = entry.price as Recipe['price']
+  const minutes = Number(entry.minutes)
+  if (entry.minutes !== undefined && Number.isFinite(minutes) && minutes > 0) out.minutes = minutes
+  if (typeof entry.emoji === 'string' && entry.emoji.trim()) out.emoji = entry.emoji.trim()
+  return out
 }

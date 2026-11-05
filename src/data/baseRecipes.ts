@@ -1,5 +1,4 @@
-import type { Ingredient, Recipe } from '../domain/types'
-import { CATALOGUE } from './catalogue'
+import type { Recipe } from '../domain/types'
 
 /** Une étape par ligne : le champ `steps` est du texte libre, numéroté à l'affichage. */
 const steps = (...lines: string[]) => lines.join('\n')
@@ -13,6 +12,7 @@ const steps = (...lines: string[]) => lines.join('\n')
 export const BASE_RECIPES: Recipe[] = [
   {
     id: 'base-tartelette-pesto',
+    course: 'plat', main: 'vege', minutes: 40, difficulty: 'facile', price: 1, emoji: '🥧',
     name: 'Tartelette pesto, tomates & salade',
     servings: 2,
     items: [
@@ -38,6 +38,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-mafe',
+    course: 'plat', main: 'volaille', minutes: 55, difficulty: 'moyen', price: 1, emoji: '🥘',
     name: 'Poulet façon mafé & riz',
     servings: 2,
     items: [
@@ -68,6 +69,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-caprese',
+    course: 'plat', main: 'volaille', minutes: 40, difficulty: 'facile', price: 2, emoji: '🍅',
     name: 'One pan poulet caprese',
     servings: 2,
     items: [
@@ -93,6 +95,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-tandoori',
+    course: 'plat', main: 'volaille', minutes: 30, difficulty: 'facile', price: 1, emoji: '🍛',
     name: 'Poulet tandoori',
     servings: 2,
     items: [
@@ -119,6 +122,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-tartelette-chevre-miel',
+    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 2, emoji: '🧀',
     name: 'Tartelette chèvre miel & salade',
     servings: 2,
     items: [
@@ -143,6 +147,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-galette-complete',
+    course: 'plat', main: 'viande', minutes: 15, difficulty: 'facile', price: 1, emoji: '🥞',
     name: 'Galette complète',
     servings: 2,
     items: [
@@ -165,6 +170,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-feuillete-epinard-feta',
+    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 1, emoji: '🥬',
     name: 'Feuilletés épinard, feta & salade',
     servings: 2,
     items: [
@@ -192,6 +198,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-feuillete-chevre-miel',
+    course: 'plat', main: 'vege', minutes: 30, difficulty: 'facile', price: 2, emoji: '🥐',
     name: 'Feuilleté chèvre miel & salade',
     servings: 2,
     items: [
@@ -218,6 +225,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-quiche-lorraine',
+    course: 'plat', main: 'viande', minutes: 55, difficulty: 'facile', price: 1, emoji: '🥧',
     name: 'Quiche lorraine',
     servings: 4,
     items: [
@@ -243,6 +251,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-grecque',
+    course: 'plat', main: 'volaille', minutes: 50, difficulty: 'facile', price: 2, emoji: '🍗',
     name: 'One pan poulet à la grecque',
     servings: 2,
     items: [
@@ -269,24 +278,3 @@ export const BASE_RECIPES: Recipe[] = [
     ),
   },
 ]
-
-/**
- * Ajoute les recettes de base à ce qui existe déjà, sans rien écraser.
- *
- * Ramène aussi les ingrédients du catalogue qu'elles utilisent et qui manquent : ceux ajoutés
- * au catalogue après la première installation ne sont jamais semés, et une recette qui
- * référence un ingrédient absent perd la ligne en silence dans la liste de courses.
- */
-export function mergeBaseRecipes(current: { recipes: Recipe[]; ingredients: Ingredient[] }) {
-  const knownRecipes = new Set(current.recipes.map((r) => r.id))
-  const knownIngredients = new Set(current.ingredients.map((i) => i.id))
-  const needed = new Set(BASE_RECIPES.flatMap((r) => r.items.map((i) => i.ingredientId)))
-
-  return {
-    recipes: [...current.recipes, ...BASE_RECIPES.filter((r) => !knownRecipes.has(r.id))],
-    ingredients: [
-      ...current.ingredients,
-      ...CATALOGUE.filter((i) => needed.has(i.id) && !knownIngredients.has(i.id)),
-    ],
-  }
-}

@@ -159,3 +159,26 @@ describe('aller-retour export puis import', () => {
     expect(data.checked).toEqual(exported.checked)
   })
 })
+
+describe('format v2', () => {
+  it('relit encore une sauvegarde v1, sans toucher aux favoris', () => {
+    const data = ok(parse({ ...valid, version: 1 }))
+    expect(data.recipes).toHaveLength(1)
+    expect(data.favorites).toBeUndefined()
+  })
+
+  it('conserve métadonnées et favoris', () => {
+    const recipes = [{ ...valid.recipes[0], course: 'plat', main: 'vege', minutes: 25, difficulty: 'facile', price: 1, emoji: '🥗' }]
+    const data = ok(parse({ ...valid, recipes, favorites: ['r1', 'base-quiche-lorraine'] }))
+    expect(data.recipes[0]).toMatchObject({ course: 'plat', main: 'vege', minutes: 25, difficulty: 'facile', price: 1, emoji: '🥗' })
+    expect(data.favorites).toEqual(['r1', 'base-quiche-lorraine'])
+  })
+
+  it('ignore une métadonnée inconnue au lieu de refuser le fichier', () => {
+    const recipes = [{ ...valid.recipes[0], main: 'licorne', price: 7, minutes: 'vite' }]
+    const data = ok(parse({ ...valid, recipes }))
+    expect(data.recipes[0].main).toBeUndefined()
+    expect(data.recipes[0].price).toBeUndefined()
+    expect(data.recipes[0].minutes).toBeUndefined()
+  })
+})

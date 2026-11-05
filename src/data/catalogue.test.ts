@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { CATALOGUE, slug } from './catalogue'
 import { AISLES } from '../domain/types'
-import { BASE_RECIPES, mergeBaseRecipes } from './baseRecipes'
+import { LIBRARY } from './library'
+import { SEASONS } from './seasons'
+import { COURSES, DIFFICULTIES, MAINS, PRICES } from '../domain/types'
 
 describe('catalogue de départ', () => {
   it('n’a aucun identifiant en double', () => {
@@ -36,19 +38,19 @@ describe('slug', () => {
   })
 })
 
-describe('recettes fournies', () => {
+describe('bibliothèque', () => {
   it('ne référence que des ingrédients existants du catalogue', () => {
     // Une faute de frappe dans un id ferait disparaître l'ingrédient de la liste de courses
     // sans le moindre message : buildShoppingList ignore les références inconnues.
     const known = new Set(CATALOGUE.map((i) => i.id))
-    const unknown = BASE_RECIPES.flatMap((r) =>
+    const unknown = LIBRARY.flatMap((r) =>
       r.items.filter((i) => !known.has(i.ingredientId)).map((i) => `${r.name} → ${i.ingredientId}`),
     )
     expect(unknown).toEqual([])
   })
 
   it('a des portions et des étapes exploitables', () => {
-    for (const r of BASE_RECIPES) {
+    for (const r of LIBRARY) {
       expect(r.servings, r.name).toBeGreaterThanOrEqual(1)
       expect(r.steps.split('\n').filter(Boolean).length, r.name).toBeGreaterThan(2)
       expect(r.items.length, r.name).toBeGreaterThan(0)
@@ -56,30 +58,37 @@ describe('recettes fournies', () => {
   })
 })
 
-describe('mergeBaseRecipes', () => {
-  it('ajoute les recettes fournies et les ingrédients qui leur manquent', () => {
-    // Cas réel : les ingrédients ajoutés au catalogue après la première installation ne sont
-    // jamais semés. Sans ce rattrapage, les lignes correspondantes disparaîtraient en silence
-    // de la liste de courses.
-    const merged = mergeBaseRecipes({ recipes: [], ingredients: [] })
-    expect(merged.recipes).toHaveLength(BASE_RECIPES.length)
-    const known = new Set(merged.ingredients.map((i) => i.id))
-    for (const r of BASE_RECIPES) {
-      for (const item of r.items) expect(known, `${r.name} → ${item.ingredientId}`).toContain(item.ingredientId)
+describe('bibliothèque — métadonnées', () => {
+  it('n’a aucun identifiant de recette en double', () => {
+    const ids = LIBRARY.map((r) => r.id)
+    expect(ids.length).toBe(new Set(ids).size)
+  })
+
+  it('renseigne type, catégorie, temps, difficulté, prix et vignette de chaque recette', () => {
+    // Une recette de la bibliothèque sans ces champs disparaîtrait de tous les filtres et
+    // rangées sans que rien ne le signale.
+    for (const r of LIBRARY) {
+      expect(COURSES, r.name).toContain(r.course)
+      if (r.course === 'plat') expect(MAINS, r.name).toContain(r.main)
+      expect(r.minutes, r.name).toBeGreaterThan(0)
+      expect(DIFFICULTIES, r.name).toContain(r.difficulty)
+      expect(PRICES, r.name).toContain(r.price)
+      expect(r.emoji, r.name).toBeTruthy()
+    }
+  })
+})
+
+describe('table des saisons', () => {
+  it('ne parle que d’ingrédients du catalogue, avec des mois de 1 à 12', () => {
+    const known = new Set(CATALOGUE.map((i) => i.id))
+    for (const [id, months] of Object.entries(SEASONS)) {
+      expect(known, id).toContain(id)
+      expect(months.length, id).toBeGreaterThan(0)
+      for (const m of months) expect(m >= 1 && m <= 12, `${id} : ${m}`).toBe(true)
     }
   })
 
-  it('n’écrase ni ne duplique ce qui existe déjà', () => {
-    const mine = { ...BASE_RECIPES[0], name: 'Ma version à moi' }
-    const merged = mergeBaseRecipes({ recipes: [mine], ingredients: CATALOGUE })
-    expect(merged.recipes.filter((r) => r.id === mine.id)).toEqual([mine])
-    expect(merged.recipes).toHaveLength(BASE_RECIPES.length)
-    expect(merged.ingredients).toEqual(CATALOGUE)
-  })
-
-  it('n’ajoute aucun ingrédient en double', () => {
-    const merged = mergeBaseRecipes({ recipes: [], ingredients: CATALOGUE })
-    const ids = merged.ingredients.map((i) => i.id)
-    expect(ids.length).toBe(new Set(ids).size)
+  it('fait passer l’hiver du poireau par janvier', () => {
+    expect(SEASONS.poireau).toEqual([9, 10, 11, 12, 1, 2, 3])
   })
 })

@@ -1,19 +1,37 @@
+/* Nunito embarquée dans l'app (licence OFL) plutôt que chargée chez Google : la PWA doit avoir
+   la même allure hors ligne, au magasin, qu'à la maison. Police variable, un seul fichier. */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/nunito-latin.woff2') format('woff2');
+}
+
 :root {
-  --c-bg: #faf8f5;
-  --c-surface: #ffffff;
-  --c-text: #1f1b18;
-  --c-muted: #7a716a;
-  --c-accent: #e8552f;
-  --c-accent-soft: #fdeee9;
-  --c-border: #e7e1da;
-  --r: 14px;
-  --topbar-h: 52px;
-  --tabbar-h: 58px;
+  --bg: #fff7ee;
+  --surface: #ffffff;
+  --ink: #2a1b12;
+  /* Gris-brun lisible sur le crème comme sur le blanc (contraste > 6:1). */
+  --muted: #6e5646;
+  --accent: #a9420e;
+  --accent-dark: #7e300a;
+  --accent-soft: #fbe3d0;
+  --line: #eadbcb;
+  --line-strong: #d9c3b0;
+  --line-soft: #f1e4d6;
+  --sand: #f3e4d4;
+  --nav: #fbefe3;
+  --good: #3f6b2a;
+  --good-soft: #e3efd8;
+  --danger: #b3261e;
+  --topbar-h: 56px;
+  --tabbar-h: 68px;
 
   color-scheme: light;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  color: var(--c-text);
-  background: var(--c-bg);
+  font-family: Nunito, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -23,41 +41,75 @@
 
 body {
   margin: 0;
+  background: var(--bg);
   overscroll-behavior-y: none;
 }
 
-/* Coquille : contenu défilant + barre d'onglets fixe au pouce. */
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- coquille ---------- */
+
 .app {
   min-height: 100dvh;
   padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
 }
 
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 10;
+/* Marge basse : la barre d'action collée en bas ne doit pas masquer le dernier élément. */
+.screen {
+  display: grid;
+  gap: 16px;
+  padding: calc(20px + env(safe-area-inset-top)) 16px 120px;
+}
+
+.screen-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  min-height: var(--topbar-h);
-  padding: 0 16px;
-  /* La marge de sécurité va en HAUT : c'est là que se trouvent barre d'état et encoche. */
-  padding-top: env(safe-area-inset-top);
-  background: var(--c-bg);
-  border-bottom: 1px solid var(--c-border);
 }
 
-.topbar h1 {
+.screen-head h1 {
   margin: 0;
-  font-size: 1.25rem;
-  font-weight: 650;
+  font-size: 1.9rem;
+  font-weight: 800;
   letter-spacing: -0.01em;
 }
 
-.screen {
-  /* Marge basse : le bouton flottant ne doit pas masquer la dernière ligne. */
-  padding: 16px 16px 88px;
+.screen-head p {
+  margin: 2px 0 0;
+  font-size: 0.95rem;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
 }
 
 .tabbar {
@@ -67,8 +119,8 @@ body {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
+  background: var(--nav);
+  border-top: 1px solid var(--line);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -77,35 +129,1254 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   min-height: var(--tabbar-h);
   border: 0;
   background: none;
-  font: inherit;
-  font-size: 0.7rem;
-  color: var(--c-muted);
-  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.tab-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 30px;
+  border-radius: 999px;
 }
 
 .tabbar button[aria-current='page'] {
-  color: var(--c-accent);
-  font-weight: 600;
+  color: var(--accent-dark);
 }
 
-.tabbar .glyph {
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.card {
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-  padding: 16px;
+.tabbar button[aria-current='page'] .tab-icon {
+  background: var(--accent-soft);
 }
 
 .muted {
-  color: var(--c-muted);
+  color: var(--muted);
+}
+
+.empty {
+  padding: 24px 8px;
+  text-align: center;
+  margin: 0;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.tag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.72rem;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.notice {
+  margin: 0;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 700;
+}
+
+.version {
+  margin: 24px 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+}
+
+.banner {
+  margin: 0;
+  padding: 12px 16px;
+  font-size: 0.9rem;
+}
+
+.banner.error {
+  background: #fde8e6;
+}
+
+.banner.update {
+  position: sticky;
+  top: 0;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  background: var(--accent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.banner.update button {
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+/* ---------- boutons ---------- */
+
+.primary {
+  background: var(--accent);
+  border: 1.5px solid var(--accent) !important;
+  color: #fff;
+  font-weight: 800;
+}
+
+.primary:disabled {
+  opacity: 0.45;
+}
+
+.primary.big {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 54px;
+  border-radius: 999px;
+  font-size: 1.05rem;
+}
+
+.ghost {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+.ghost-btn {
+  min-height: 52px;
+  padding: 0 20px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-weight: 800;
+}
+
+.dashed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 52px;
+  border: 2px dashed var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.dashed.strong {
+  border-color: var(--accent);
+}
+
+.wide {
+  width: 100%;
+  min-height: 52px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+.round-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.92);
+  color: var(--ink);
+  box-shadow: 0 1px 4px rgb(42 27 18 / 0.15);
+}
+
+.round-btn.heart {
+  color: var(--accent);
+}
+
+.fab {
+  position: fixed;
+  right: max(16px, calc(50% - 280px + 16px));
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 18px rgb(42 27 18 / 0.25);
+}
+
+.editor .fab {
+  bottom: calc(env(safe-area-inset-bottom) + 20px);
+}
+
+/* ---------- pastilles et compteurs ---------- */
+
+/* Rangée de pastilles qui défile à l'horizontale, bord à bord. */
+.pills {
+  display: flex;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pills::-webkit-scrollbar {
+  display: none;
+}
+
+.pills.wrap {
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.95rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pill[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-dark);
+}
+
+.pill.clear {
+  border-style: dashed;
+  color: var(--muted);
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stepper button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+}
+
+.stepper button:disabled {
+  opacity: 0.4;
+}
+
+.stepper strong {
+  min-width: 60px;
+  text-align: center;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+/* ---------- cartes ---------- */
+
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 18px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+}
+
+.card h2,
+.meals h2,
+.row h2,
+.all h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.gen-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field-label {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Vignette sans photo : emoji sur une teinte pastel dérivée du nom. */
+.fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: hsl(var(--hue) 70% 90%);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* ---------- menu ---------- */
+
+.meals {
+  display: grid;
+  gap: 12px;
+}
+
+.meal-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.meal {
+  overflow: hidden;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 24px;
+}
+
+.meal-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 16px;
+  border: 0;
+  background: #fdf0e4;
+  text-align: left;
+}
+
+.meal-emoji {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  object-fit: cover;
+  font-size: 2.6rem;
+}
+
+.meal-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.meal-index {
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent-dark);
+}
+
+.meal-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.meal-meta {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.meal-actions {
+  display: flex;
+  border-top: 1px solid var(--line-soft);
+}
+
+.meal-actions > button,
+.meal-servings {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 52px;
+  border: 0;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.meal-actions > button:first-child {
+  color: var(--accent-dark);
+}
+
+.meal-servings {
+  gap: 0;
+  white-space: nowrap;
+  border-inline: 1px solid var(--line-soft);
+}
+
+.meal-servings button {
+  width: 40px;
+  height: 52px;
+  border: 0;
+  background: none;
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+}
+
+.meal-servings button:disabled {
+  opacity: 0.35;
+}
+
+/* Barre d'action collée au-dessus des onglets, atteignable au pouce sans remonter. */
+.bottom-bar {
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+
+.bottom-bar.fixed {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
+  z-index: 16;
+  padding-bottom: 12px;
+  background: linear-gradient(rgb(255 247 238 / 0), var(--bg) 35%);
+}
+
+/* ---------- recettes ---------- */
+
+.segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: var(--sand);
+  border-radius: 999px;
+}
+
+.segmented button {
+  flex: 1;
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.segmented button[aria-selected='true'] {
+  background: var(--surface);
+  color: var(--accent-dark);
+  box-shadow: 0 1px 3px rgb(42 27 18 / 0.12);
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.search-field:focus-within {
+  border-color: var(--accent);
+}
+
+.row {
+  display: grid;
+  gap: 10px;
+}
+
+.row-track {
+  display: flex;
+  gap: 12px;
+  margin: 0 -16px;
+  padding: 0 16px 4px;
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.row-track::-webkit-scrollbar {
+  display: none;
+}
+
+.row-track li {
+  flex: 0 0 156px;
+  scroll-snap-align: start;
+}
+
+.row-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 0 0 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: left;
+}
+
+.row-photo {
+  width: 100%;
+  height: 96px;
+  object-fit: cover;
+  font-size: 2.8rem;
+}
+
+.row-card-name {
+  padding: 10px 12px 0;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.row-card-meta {
+  padding: 4px 12px 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.row-card-why {
+  padding: 4px 12px 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--good);
+}
+
+.all {
+  display: grid;
+  gap: 10px;
+}
+
+.all-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card-recipe {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.card-thumb {
+  position: relative;
+}
+
+.card-open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.card-photo {
+  display: flex;
+  width: 100%;
+  height: 112px;
+  object-fit: cover;
+  font-size: 3rem;
+}
+
+.card-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.round-btn.small {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+}
+
+.card-name {
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.card-meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.add-small {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+  margin-top: auto;
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+/* ---------- fiche recette ---------- */
+
+.recipe-page {
+  display: flex;
+  flex-direction: column;
+}
+
+.hero-wrap {
+  position: relative;
+}
+
+.hero {
+  display: flex;
+  width: 100%;
+  height: calc(230px + env(safe-area-inset-top));
+  object-fit: cover;
+  font-size: 7rem;
+}
+
+.hero-back,
+.hero-actions {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top));
+}
+
+.hero-back {
+  left: 16px;
+}
+
+.hero-actions {
+  right: 16px;
+  display: flex;
+  gap: 8px;
+}
+
+.recipe-body {
+  position: relative;
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  margin-top: -24px;
+  padding: 22px 16px 24px;
+  border-radius: 24px 24px 0 0;
+  background: var(--bg);
+}
+
+.recipe-body h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.chips li.good {
+  background: var(--good-soft);
+  color: var(--good);
+}
+
+.chips li.off {
+  background: var(--sand);
+  color: var(--muted);
+}
+
+.servings-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.cart-entries {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cart-entries li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 4px 2px 16px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-weight: 800;
+}
+
+.cart-entries .icon-btn {
+  color: var(--accent-dark);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--line);
+}
+
+.tabs button {
+  flex: 1;
+  min-height: 48px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  font-weight: 800;
+  color: var(--muted);
+}
+
+.tabs button[aria-selected='true'] {
+  color: var(--accent-dark);
+  border-bottom-color: var(--accent);
+}
+
+.detail-items {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.detail-items li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.detail-name {
+  font-weight: 600;
+}
+
+.detail-qty {
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps {
+  display: grid;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 14px;
+  align-items: start;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.steps li::before {
+  content: counter(step);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.recipe-page .bottom-bar {
+  position: sticky;
+  bottom: 0;
+  border-top: 1px solid var(--line);
+}
+
+/* ---------- courses ---------- */
+
+.progress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--sand);
+}
+
+.progress div {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+  transition: width 0.25s;
+}
+
+.aisle {
+  padding: 6px 6px 6px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.aisle h2 {
+  margin: 8px 0 2px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Rayon entièrement pris : estompé et renvoyé en bas de la liste. */
+.aisle-done {
+  opacity: 0.6;
+}
+
+.checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checklist > li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+}
+
+/* Toute la ligne est la zone de cochage : large cible, atteignable une main occupée. */
+.check-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px 6px 10px 0;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+  height: 30px;
+  border: 2px solid #b9a08c;
+  border-radius: 9px;
+  background: var(--surface);
+  color: #fff;
+}
+
+.check-main[aria-pressed='true'] .box {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.check-text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.check-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  overflow-wrap: break-word;
+}
+
+.check-origin {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.check-qty {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.checklist .done .check-name,
+.checklist .done .check-qty {
+  color: #8a7465;
+  text-decoration: line-through;
+}
+
+/* Ce qu'il reste à prendre quand la quantité a monté après le cochage. */
+.bumped {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.row-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--muted);
+}
+
+.row-action.chevron[aria-expanded='true'] {
+  transform: rotate(180deg);
+}
+
+.sources {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0 16px 14px 44px;
+  list-style: none;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.sources li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.pantry {
+  padding: 14px 16px;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.pantry summary {
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pantry-lines {
+  margin: 10px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pantry-lines li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  color: var(--muted);
+}
+
+.pantry-lines li + li {
+  border-top: 1px solid var(--line-soft);
+}
+
+.finish {
+  margin-top: 8px;
+}
+
+/* ---------- feuilles modales (<dialog> natif) ---------- */
+
+dialog {
+  width: 100%;
+  max-width: 560px;
+  margin: auto auto 0;
+  padding: 0;
+  border: 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
+  color: inherit;
+}
+
+dialog::backdrop {
+  background: rgb(42 27 18 / 0.4);
+}
+
+.sheet {
+  display: grid;
+  gap: 16px;
+  padding: 20px 16px calc(24px + env(safe-area-inset-bottom));
+  max-height: 88dvh;
+  overflow-y: auto;
+}
+
+.sheet h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.grabber {
+  justify-self: center;
+  width: 48px;
+  height: 5px;
+  margin-top: -6px;
+  border-radius: 999px;
+  background: var(--line-strong);
+}
+
+.sheet label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.sheet input:not([type='checkbox']),
+.sheet select,
+.sheet textarea {
+  width: 100%;
+  min-height: 50px;
+  padding: 10px 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 16px;
+}
+
+.sheet input:focus,
+.sheet select:focus,
+.sheet textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.sheet input:disabled {
+  color: var(--muted);
+}
+
+.sheet input.invalid {
+  border-color: var(--danger);
+}
+
+.sheet label.check {
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 12px;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sheet label.check input {
+  width: 24px;
+  height: 24px;
+  margin: 2px 0 0;
+  accent-color: var(--accent);
+}
+
+.sheet label.check em {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.85rem;
+  font-style: normal;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.actions button {
+  flex: 1;
+  min-height: 52px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line-strong);
+  font-weight: 800;
+}
+
+.danger {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line-strong);
+  font-weight: 800;
+  color: var(--danger);
+}
+
+.danger-zone {
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.pending {
+  display: grid;
+  gap: 2px;
+}
+
+.pending-name {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.pending-qty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sheet .pending-qty input {
+  flex: 0 0 120px;
+  width: 120px;
+  text-align: right;
+}
+
+dialog.confirm {
+  max-width: 340px;
+  margin: auto;
+  border-radius: 24px;
+}
+
+.confirm-message {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
 .status {
@@ -122,120 +1393,60 @@ body {
 }
 
 .status dt {
-  color: var(--c-muted);
+  color: var(--muted);
   font-size: 0.9rem;
 }
 
 .status dd {
   margin: 0;
-  font-weight: 600;
+  font-weight: 800;
   text-align: right;
 }
 
 .ok {
-  color: #1f7a45;
+  color: var(--good);
 }
 
 .ko {
-  color: var(--c-accent);
+  color: var(--accent);
 }
 
-/* ---------- éléments communs ---------- */
-
-.count {
-  background: var(--c-accent-soft);
-  color: var(--c-accent);
-  font-size: 0.8rem;
-  font-weight: 600;
-  padding: 3px 9px;
-  border-radius: 999px;
+.import {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--ink) !important;
+  cursor: pointer;
 }
 
-.banner {
-  margin: 0;
-  padding: 12px 16px;
-  font-size: 0.9rem;
-}
-
-.empty {
-  padding: 32px 0;
-  text-align: center;
-}
-
-.error {
-  color: #b3261e;
-}
-
-.hint {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--c-muted);
-  line-height: 1.4;
-}
-
-.tag {
-  background: var(--c-accent-soft);
-  color: var(--c-accent);
-  font-size: 0.7rem;
-  font-weight: 600;
-  padding: 2px 7px;
-  border-radius: 999px;
-}
-
-/* ---------- recherche ---------- */
-
-/* Colle sous la barre de titre : chercher un ingrédient ne doit jamais obliger
-   à remonter toute la liste. Les marges négatives compensent le padding de .screen
-   pour que la bande opaque aille d'un bord à l'autre pendant le défilement. */
-.search {
-  position: sticky;
-  top: calc(var(--topbar-h) + env(safe-area-inset-top));
-  z-index: 9;
-  margin: -16px -16px 0;
-  padding: 12px 16px;
-  background: var(--c-bg);
-  border-bottom: 1px solid var(--c-border);
-}
-
-.search input {
-  width: 100%;
-  min-height: 46px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 1rem;
-  color: inherit;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-}
-
-/* ---------- listes par rayon ---------- */
+/* ---------- listes de lignes (catalogue, suggestions) ---------- */
 
 .group {
-  margin-top: 24px;
+  margin-top: 8px;
 }
 
 .group h2 {
   margin: 0 0 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--c-muted);
+  color: var(--muted);
 }
 
 .rows {
   margin: 0;
   padding: 0;
   list-style: none;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
   overflow: hidden;
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
 }
 
 .rows li + li {
-  border-top: 1px solid var(--c-border);
+  border-top: 1px solid var(--line-soft);
 }
 
 /* Restreint aux lignes elles-mêmes : appliqué à « tout bouton dans .rows », width: 100%
@@ -246,22 +1457,20 @@ body {
   justify-content: space-between;
   gap: 12px;
   width: 100%;
-  min-height: 50px;
-  padding: 10px 14px;
+  min-height: 54px;
+  padding: 10px 16px;
   border: 0;
   background: none;
-  font: inherit;
-  color: inherit;
   text-align: left;
-  cursor: pointer;
 }
 
 .rows > li > button:active {
-  background: var(--c-accent-soft);
+  background: var(--accent-soft);
 }
 
 .row-name {
   flex: 1;
+  font-weight: 700;
 }
 
 .row-meta {
@@ -270,214 +1479,73 @@ body {
   gap: 8px;
   flex-shrink: 0;
   font-size: 0.85rem;
-  color: var(--c-muted);
+  color: var(--muted);
 }
 
-/* ---------- bouton d'ajout flottant ---------- */
-
-.fab {
-  position: fixed;
-  right: 16px;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 16px);
-  z-index: 15;
-  width: 56px;
-  height: 56px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--c-accent);
-  color: #fff;
-  font-size: 1.9rem;
-  line-height: 1;
-  box-shadow: 0 4px 14px rgb(0 0 0 / 0.22);
-  cursor: pointer;
+.create {
+  color: var(--accent-dark) !important;
+  font-weight: 800;
 }
 
-/* ---------- feuille modale (élément <dialog> natif) ---------- */
+.suggestions {
+  margin-top: 4px;
+}
 
-dialog {
+/* Colle sous la barre de titre : chercher ne doit jamais obliger à remonter toute la liste. */
+.search {
+  position: sticky;
+  top: calc(var(--topbar-h) + env(safe-area-inset-top));
+  z-index: 9;
+  margin: -20px -16px 0;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.search input {
   width: 100%;
-  max-width: 480px;
-  margin: auto auto 0;
-  padding: 0;
-  border: 0;
-  border-radius: var(--r) var(--r) 0 0;
-  background: var(--c-surface);
-  color: inherit;
-}
-
-dialog::backdrop {
-  background: rgb(0 0 0 / 0.45);
-}
-
-.sheet {
-  display: grid;
-  gap: 16px;
-  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
-  max-height: 88dvh;
-  overflow-y: auto;
-}
-
-.sheet h2 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.sheet label {
-  display: grid;
-  gap: 6px;
-  font-size: 0.85rem;
-  color: var(--c-muted);
-}
-
-.sheet input:not([type='checkbox']),
-.sheet select,
-.sheet textarea {
-  width: 100%;
-  min-height: 46px;
-  padding: 10px 12px;
-  font: inherit;
-  font-size: 1rem;
-  color: var(--c-text);
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-}
-
-.sheet input:disabled {
-  color: var(--c-muted);
-}
-
-.sheet label.check {
-  grid-template-columns: auto 1fr;
-  align-items: start;
-  gap: 12px;
-  color: var(--c-text);
-  font-size: 1rem;
-}
-
-.sheet label.check input {
-  width: 22px;
-  height: 22px;
-  margin: 2px 0 0;
-  accent-color: var(--c-accent);
-}
-
-.sheet label.check em {
-  display: block;
-  margin-top: 2px;
-  font-size: 0.82rem;
-  font-style: normal;
-  color: var(--c-muted);
-}
-
-.actions {
-  display: flex;
-  gap: 10px;
-}
-
-.actions button {
-  flex: 1;
-  min-height: 48px;
-  border-radius: 10px;
-  border: 1px solid var(--c-border);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.primary {
-  background: var(--c-accent);
-  border-color: var(--c-accent) !important;
-  color: #fff;
-}
-
-.primary:disabled {
-  opacity: 0.45;
-}
-
-.ghost {
-  background: var(--c-surface);
-  color: var(--c-text);
-}
-
-.danger {
-  width: 100%;
-  min-height: 48px;
-  border-radius: 10px;
-  border: 1px solid var(--c-border);
-  font: inherit;
-  font-weight: 600;
-  color: #b3261e;
-  cursor: pointer;
-}
-
-.danger-zone {
-  border-top: 1px solid var(--c-border);
-  padding-top: 16px;
-}
-
-.banner.update {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  background: var(--c-accent);
-  color: #fff;
-  font-weight: 600;
-}
-
-.banner.update button {
-  min-height: 38px;
+  min-height: 50px;
   padding: 0 16px;
-  border: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
   border-radius: 999px;
-  background: #fff;
-  color: var(--c-accent);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
 }
 
-/* ---------- vignettes de repas ---------- */
-
-.thumb {
-  flex-shrink: 0;
-  width: 46px;
-  height: 46px;
-  border-radius: 10px;
-  object-fit: cover;
-  background: var(--c-border);
-}
-
-.thumb.fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #fff;
-  background: hsl(var(--hue) 52% 52%);
-}
-
-.version {
-  margin: 40px 0 0;
-  text-align: center;
-  font-size: 0.75rem;
-}
-
-/* ---------- éditeur de repas plein écran ---------- */
+/* ---------- écrans superposés plein écran (fiche, éditeur, catalogue) ---------- */
 
 .editor {
   position: fixed;
   inset: 0;
   z-index: 30;
   overflow-y: auto;
-  background: var(--c-bg);
+  background: var(--bg);
   overscroll-behavior: contain;
 }
 
-.editor .topbar h1 {
-  font-size: 1rem;
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: var(--topbar-h);
+  padding: env(safe-area-inset-top) 12px 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+
+.topbar h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.editor .screen {
+  padding-top: 20px;
 }
 
 .editor .sheet {
@@ -487,39 +1555,56 @@ dialog::backdrop {
 
 .editor section h2 {
   margin: 0 0 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--c-muted);
+  color: var(--muted);
+}
+
+/* L'éditeur s'ouvre sur la section correspondant à l'onglet : la barre collante
+   ne doit pas recouvrir la cible du défilement. */
+.editor section,
+.editor label {
+  scroll-margin-top: calc(var(--topbar-h) + env(safe-area-inset-top) + 12px);
 }
 
 .link {
-  min-height: 40px;
-  padding: 0 4px;
+  min-height: 44px;
+  padding: 0 6px;
   border: 0;
   background: none;
-  font: inherit;
-  color: var(--c-muted);
-  cursor: pointer;
+  font-weight: 700;
+  color: var(--muted);
 }
 
 .link.strong {
-  font-weight: 700;
-  color: var(--c-accent);
+  font-weight: 800;
+  color: var(--accent-dark);
 }
 
 .link:disabled {
   opacity: 0.4;
 }
 
+.field-row {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 12px;
+}
+
+.sheet .emoji-input {
+  font-size: 1.6rem;
+  text-align: center;
+}
+
 .photo-picker {
   display: block;
   overflow: hidden;
   aspect-ratio: 16 / 10;
-  border: 1px dashed var(--c-border);
-  border-radius: var(--r);
-  background: var(--c-surface);
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 20px;
+  background: var(--surface);
   cursor: pointer;
 }
 
@@ -534,45 +1619,18 @@ dialog::backdrop {
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: var(--c-muted);
+  color: var(--muted);
 }
-
-.stepper {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.stepper button {
-  width: 46px;
-  height: 46px;
-  border: 1px solid var(--c-border);
-  border-radius: 50%;
-  background: var(--c-surface);
-  font: inherit;
-  font-size: 1.4rem;
-  color: var(--c-text);
-  cursor: pointer;
-}
-
-.stepper strong {
-  min-width: 2ch;
-  text-align: center;
-  font-size: 1.2rem;
-  color: var(--c-text);
-}
-
-/* ---------- ingrédients d'une recette ---------- */
 
 /* Deux lignes plutôt qu'une : le nom reste toujours lisible en entier, et l'unité
    se lit juste à côté de la valeur saisie. Sur une seule ligne, un nom long était
    écrasé à zéro et il ne restait que le champ et l'unité. */
 .items {
+  display: grid;
+  gap: 8px;
   margin: 0 0 12px;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 8px;
 }
 
 .items li {
@@ -580,15 +1638,16 @@ dialog::backdrop {
   grid-template-columns: 1fr auto;
   align-items: center;
   gap: 6px 10px;
-  padding: 10px 6px 10px 12px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
+  padding: 10px 6px 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--line);
+  border-radius: 16px;
 }
 
 .item-name {
   grid-column: 1;
-  font-weight: 500;
+  font-weight: 700;
+  color: var(--ink);
   overflow-wrap: anywhere;
 }
 
@@ -604,183 +1663,29 @@ dialog::backdrop {
 .sheet .item-qty input.qty {
   flex: 0 0 96px;
   width: 96px;
-  min-height: 42px;
+  min-height: 44px;
   text-align: right;
 }
 
 .qty.invalid {
-  border-color: #b3261e !important;
+  border-color: var(--danger) !important;
 }
 
 .item-unit {
-  font-size: 0.92rem;
-  color: var(--c-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--muted);
 }
 
 .remove {
   grid-column: 2;
   grid-row: 1;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: 50%;
   background: none;
-  font-size: 1rem;
-  color: var(--c-muted);
-  cursor: pointer;
-}
-
-.suggestions {
-  margin-top: 8px;
-}
-
-.create {
-  color: var(--c-accent);
-  font-weight: 600;
-}
-
-/* L'éditeur s'ouvre sur la section correspondant à l'onglet : la barre collante
-   ne doit pas recouvrir la cible du défilement. */
-.editor section,
-.editor label {
-  scroll-margin-top: calc(var(--topbar-h) + env(safe-area-inset-top) + 12px);
-}
-
-.sheet textarea {
-  line-height: 1.55;
-}
-
-/* ---------- fiche de présentation d'un repas ---------- */
-
-.detail {
-  padding: 0 16px calc(40px + env(safe-area-inset-bottom));
-}
-
-.hero {
-  display: block;
-  width: calc(100% + 32px);
-  margin: 0 -16px;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
-  background: var(--c-border);
-}
-
-.detail-head {
-  padding: 18px 0 2px;
-}
-
-.detail-head h2 {
-  margin: 0 0 4px;
-  font-size: 1.5rem;
-  letter-spacing: -0.02em;
-}
-
-.detail-head p {
-  margin: 0;
-}
-
-.tabs {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 4px;
-  margin: 18px 0 22px;
-  padding: 4px;
-  background: var(--c-border);
-  border-radius: 999px;
-}
-
-.tabs button {
-  min-height: 42px;
-  border: 0;
-  border-radius: 999px;
-  background: none;
-  font: inherit;
-  font-weight: 600;
-  color: var(--c-muted);
-  cursor: pointer;
-}
-
-.tabs button[aria-selected='true'] {
-  background: var(--c-surface);
-  color: var(--c-text);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.12);
-}
-
-.steps {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: step;
-  display: grid;
-  gap: 18px;
-}
-
-.steps li {
-  counter-increment: step;
-  display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 14px;
-  align-items: start;
-  font-size: 1.05rem;
-  line-height: 1.55;
-}
-
-.steps li::before {
-  content: counter(step);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--c-accent-soft);
-  color: var(--c-accent);
-  font-size: 0.85rem;
-  font-weight: 700;
-}
-
-.detail-items {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.detail-items li {
-  display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: 14px;
-  align-items: baseline;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--c-border);
-  font-size: 1.02rem;
-}
-
-.detail-qty {
-  text-align: right;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.detail-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-/* ---------- confirmation ---------- */
-
-dialog.confirm {
-  max-width: 340px;
-  margin: auto;
-  border-radius: var(--r);
-}
-
-.confirm-message {
-  margin: 0;
-  font-size: 1.05rem;
-  line-height: 1.5;
+  color: var(--muted);
 }
 
 /* ---------- choix de l'unité ---------- */
@@ -803,502 +1708,30 @@ dialog.confirm {
 }
 
 .unit-list button[aria-current='true'] {
-  color: var(--c-accent);
-  font-weight: 600;
+  color: var(--accent-dark);
+  font-weight: 800;
 }
 
 /* Bouton qui a l'apparence d'un champ, pour ouvrir le sélecteur d'unité. */
-.field {
-  display: grid;
-  gap: 6px;
-  font-size: 0.85rem;
-}
-
-.field-label {
-  color: var(--c-muted);
-}
-
 .select-like {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   width: 100%;
-  min-height: 46px;
-  padding: 10px 12px;
-  font: inherit;
+  min-height: 50px;
+  padding: 10px 14px;
   font-size: 1rem;
-  color: var(--c-text);
+  font-weight: 600;
   text-align: left;
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-  cursor: pointer;
+  background: var(--surface);
+  border: 1.5px solid var(--line-strong);
+  border-radius: 16px;
 }
 
 .select-like:disabled {
-  color: var(--c-muted);
+  color: var(--muted);
   cursor: not-allowed;
-}
-
-/* ---------- grille de sélection ---------- */
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-  gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-/* Laisse la place à la barre de panier, sinon la dernière rangée est masquée. */
-.grid.with-summary {
-  padding-bottom: 72px;
-}
-
-/* Même réserve de place sous la liste de courses, sinon la barre masque la fin. */
-.app .screen:has(.cart-summary) {
-  padding-bottom: 148px;
-}
-
-.tile {
-  position: relative;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-  overflow: hidden;
-}
-
-.tile-main {
-  display: block;
-  width: 100%;
-  padding: 0 0 10px;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.tile-photo {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-  background: var(--c-border);
-}
-
-.tile-photo.fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #fff;
-  background: hsl(var(--hue) 52% 52%);
-}
-
-.tile-name {
-  display: block;
-  padding: 10px 12px 2px;
-  font-weight: 600;
-  line-height: 1.25;
-}
-
-.tile-meta {
-  display: block;
-  padding: 0 12px;
-  font-size: 0.8rem;
-  color: var(--c-muted);
-}
-
-.tile-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  padding: 3px 9px;
-  border-radius: 999px;
-  background: var(--c-accent);
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.tile-add {
-  position: absolute;
-  right: 8px;
-  bottom: 8px;
-  width: 38px;
-  height: 38px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--c-accent-soft);
-  color: var(--c-accent);
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-}
-
-/* ---------- panier ---------- */
-
-.cart-summary {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom));
-  z-index: 16;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  background: var(--c-bg);
-  border-top: 1px solid var(--c-border);
-}
-
-.cart-summary .primary {
-  flex: 1;
-  min-height: 46px;
-  border: 0;
-  border-radius: 10px;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.fab.raised {
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 84px);
-}
-
-.tab-badge {
-  position: absolute;
-  margin: -6px 0 0 -4px;
-  padding: 1px 6px;
-  border-radius: 999px;
-  background: var(--c-accent);
-  color: #fff;
-  font-size: 0.65rem;
-  font-weight: 700;
-}
-
-.tabbar .glyph {
-  position: relative;
-}
-
-.cart-entries {
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 6px;
-}
-
-.cart-entries li {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 8px 6px 8px 14px;
-  border-radius: 10px;
-  background: var(--c-accent-soft);
-  color: var(--c-accent);
-  font-weight: 600;
-}
-
-/* Barre d'ajout collée en bas de la fiche, atteignable au pouce sans remonter. */
-.add-bar {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-}
-
-.add-servings {
-  display: grid;
-  gap: 4px;
-  font-size: 0.75rem;
-}
-
-.add-bar .primary {
-  flex: 1;
-  min-height: 48px;
-  border: 0;
-  border-radius: 10px;
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.add-bar .stepper {
-  gap: 10px;
-}
-
-.add-bar .stepper button {
-  width: 38px;
-  height: 38px;
-  font-size: 1.2rem;
-}
-
-.empty button {
-  margin-top: 14px;
-  min-height: 46px;
-  padding: 0 20px;
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-  background: var(--c-surface);
-  font: inherit;
-  font-weight: 600;
-  color: var(--c-text);
-  cursor: pointer;
-}
-
-/* ---------- liste de courses ---------- */
-
-.list-count {
-  margin: 0 0 4px;
-  font-size: 0.9rem;
-}
-
-/* Volontairement indépendant de .rows : la règle générique « .rows button { width: 100% } »
-   s'appliquait aussi aux boutons ⌄ et ✕, qui occupaient toute la ligne et écrasaient le nom
-   à zéro — d'où le texte affiché une lettre par ligne, et la croix invisible qui supprimait
-   l'article dès qu'on touchait son nom. */
-.checklist {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-  overflow: hidden;
-}
-
-.checklist > li + li {
-  border-top: 1px solid var(--c-border);
-}
-
-.check-row {
-  display: flex;
-  align-items: center;
-}
-
-/* Toute la partie gauche est la zone de cochage : large cible, atteignable une main occupée. */
-.check-main {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1 1 auto;
-  min-width: 0;
-  min-height: 60px;
-  padding: 12px 4px 12px 14px;
-  border: 0;
-  background: none;
-  font: inherit;
-  font-size: 1rem;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.check-main:active {
-  background: var(--c-accent-soft);
-}
-
-.box {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 28px;
-  height: 28px;
-  border: 2px solid var(--c-border);
-  border-radius: 8px;
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 700;
-}
-
-.check-main[aria-pressed='true'] .box {
-  background: var(--c-accent);
-  border-color: var(--c-accent);
-}
-
-.check-qty {
-  flex: 0 0 auto;
-  min-width: 82px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.check-name {
-  flex: 1 1 auto;
-  min-width: 0;
-  overflow-wrap: break-word;
-}
-
-.checklist .done .check-main {
-  color: var(--c-muted);
-}
-
-.checklist .done .check-name,
-.checklist .done .check-qty {
-  text-decoration: line-through;
-}
-
-/* Ce qu'il reste à prendre quand la quantité a monté après le cochage. */
-.bumped {
-  display: inline-block;
-  margin-left: 8px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--c-accent);
-  color: #fff;
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.row-action {
-  flex: 0 0 46px;
-  width: 46px;
-  height: 46px;
-  border: 0;
-  border-radius: 50%;
-  background: none;
-  font-size: 1.05rem;
-  color: var(--c-muted);
-  cursor: pointer;
-}
-
-.row-action.chevron[aria-expanded='true'] {
-  transform: rotate(180deg);
-}
-
-.sources {
-  margin: 0;
-  padding: 0 16px 14px 56px;
-  list-style: none;
-  display: grid;
-  gap: 5px;
-  font-size: 0.88rem;
-  color: var(--c-muted);
-}
-
-.sources li {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-/* ---------- fond de placard ---------- */
-
-.pantry {
-  margin-top: 24px;
-}
-
-.pantry summary {
-  display: flex;
-  align-items: center;
-  min-height: 46px;
-  padding: 0 4px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--c-muted);
-  cursor: pointer;
-}
-
-.pantry-lines {
-  margin: 4px 0 0;
-  padding: 0;
-  list-style: none;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-  overflow: hidden;
-}
-
-.pantry-lines li {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 13px 14px;
-  color: var(--c-muted);
-}
-
-.pantry-lines li + li {
-  border-top: 1px solid var(--c-border);
-}
-
-.pantry .hint {
-  padding: 10px 4px 0;
-}
-
-/* ---------- article ajouté à la main ---------- */
-
-.add-extra {
-  width: 100%;
-  min-height: 52px;
-  margin-top: 20px;
-  border: 1px dashed var(--c-border);
-  border-radius: var(--r);
-  background: var(--c-surface);
-  font: inherit;
-  font-weight: 600;
-  color: var(--c-accent);
-  cursor: pointer;
-}
-
-.extra-form {
-  display: grid;
-  gap: 10px;
-  margin-top: 20px;
-  padding: 14px;
-  background: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: var(--r);
-}
-
-.extra-form input,
-.extra-form select {
-  width: 100%;
-  min-height: 48px;
-  padding: 10px 12px;
-  font: inherit;
-  font-size: 1rem;
-  color: var(--c-text);
-  background: var(--c-bg);
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-}
-
-.extra-form .ghost {
-  min-height: 46px;
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.pending-name {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.pending-qty {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.pending-qty input {
-  flex: 0 0 110px;
-  text-align: right;
 }
 
 /* ---------- largeur de lecture ---------- */
@@ -1308,54 +1741,7 @@ dialog.confirm {
 .app,
 .editor,
 .tabbar,
-.cart-summary {
+.bottom-bar.fixed {
   max-width: 560px;
   margin-inline: auto;
-}
-
-.editor {
-  border-inline: 1px solid var(--c-border);
-}
-
-.fab {
-  right: max(16px, calc(50% - 280px + 16px));
-}
-
-/* ---------- réglages ---------- */
-
-.topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.topbar-right .link {
-  width: 40px;
-  font-size: 1.2rem;
-}
-
-.wide {
-  width: 100%;
-  min-height: 50px;
-  border: 1px solid var(--c-border);
-  border-radius: 10px;
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.import {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--c-text);
-}
-
-/* Rayon entièrement pris : estompé et renvoyé en bas de la liste. */
-.aisle-done h2 {
-  opacity: 0.55;
-}
-
-.aisle-done .checklist {
-  opacity: 0.6;
 }

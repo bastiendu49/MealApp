@@ -33,6 +33,21 @@ export type Ingredient = {
 /** `qty: null` = « quantité suffisante », affiché « qs », jamais additionné. */
 export type RecipeItem = { ingredientId: string; qty: number | null }
 
+/** Plat ou dessert : le générateur de menu ne pioche que dans les plats. */
+export const COURSES = ['plat', 'dessert'] as const
+export type Course = (typeof COURSES)[number]
+
+/** Ingrédient principal d'un plat, pour filtrer et varier le menu. */
+export const MAINS = ['viande', 'volaille', 'poisson', 'vege'] as const
+export type Main = (typeof MAINS)[number]
+
+export const DIFFICULTIES = ['facile', 'moyen', 'difficile'] as const
+export type Difficulty = (typeof DIFFICULTIES)[number]
+
+/** Estimation relative du coût : € petit prix, €€ moyen, €€€ plus cher. Pas de vrais prix. */
+export const PRICES = [1, 2, 3] as const
+export type Price = (typeof PRICES)[number]
+
 export type Recipe = {
   id: string
   name: string
@@ -42,6 +57,16 @@ export type Recipe = {
   steps: string
   items: RecipeItem[]
   photo?: Blob
+  /* Métadonnées facultatives : une recette saisie à la main peut ne pas les avoir, elle
+     n'apparaît alors simplement pas dans les filtres qui les demandent. */
+  course?: Course
+  main?: Main
+  /** Temps total, préparation et cuisson comprises. */
+  minutes?: number
+  difficulty?: Difficulty
+  price?: Price
+  /** Vignette quand il n'y a pas de photo. */
+  emoji?: string
 }
 
 /** Un repas ajouté deux fois = deux entrées, éventuellement avec des convives différents. */

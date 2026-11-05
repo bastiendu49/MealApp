@@ -7,7 +7,10 @@ import { useBackGuard } from '../lib/useBackGuard'
 
 type State = {
   ingredients: Ingredient[]
+  /** Recettes stockées sur le téléphone seulement : la bibliothèque est dans le code. */
   recipes: Recipe[]
+  favorites: string[]
+  libraryCount: number
   cart: CartEntry[]
   extras: Extra[]
   checked: Checked
@@ -16,12 +19,12 @@ type State = {
 export default function Settings({
   state,
   onImport,
-  onLoadBase,
+  onOpenIngredients,
   onClose,
 }: {
   state: State
   onImport: (backup: Backup) => void
-  onLoadBase: () => void
+  onOpenIngredients: () => void
   onClose: () => void
 }) {
   const ref = useRef<HTMLDialogElement>(null)
@@ -64,6 +67,7 @@ export default function Settings({
         exportedAt: new Date().toISOString(),
         ingredients: state.ingredients,
         recipes,
+        favorites: state.favorites,
         cart: state.cart,
         extras: state.extras,
         checked: state.checked,
@@ -106,9 +110,15 @@ export default function Settings({
 
         <dl className="status">
           <div>
-            <dt>Repas · Ingrédients</dt>
+            <dt>Bibliothèque · Tes recettes</dt>
             <dd>
-              {state.recipes.length} · {state.ingredients.length}
+              {state.libraryCount} · {state.recipes.length}
+            </dd>
+          </div>
+          <div>
+            <dt>Favoris · Ingrédients</dt>
+            <dd>
+              {state.favorites.length} · {state.ingredients.length}
             </dd>
           </div>
           <div>
@@ -142,13 +152,10 @@ export default function Settings({
           <input type="file" accept="application/json,.json" onChange={pickFile} hidden />
         </label>
 
-        <button type="button" className="ghost wide" onClick={onLoadBase}>
-          Ajouter les recettes fournies
+        <button type="button" className="ghost wide" onClick={onOpenIngredients}>
+          Catalogue d’ingrédients
         </button>
-        <p className="hint">
-          N’écrase rien : seules les recettes fournies que tu n’as pas déjà sont ajoutées, avec
-          les ingrédients qui leur manquent.
-        </p>
+        <p className="hint">Unités, rayons et ingrédients « j’en ai toujours ».</p>
 
         {error && <p className="error">{error}</p>}
 
@@ -163,7 +170,7 @@ export default function Settings({
         <Confirm
           message={`Remplacer TOUT le contenu actuel par cette sauvegarde du ${new Date(
             pending.exportedAt,
-          ).toLocaleDateString('fr-FR')} ? ${pending.recipes.length} repas et ${
+          ).toLocaleDateString('fr-FR')} ? ${pending.recipes.length} recette(s) à toi et ${
             pending.ingredients.length
           } ingrédients seront restaurés. Tes données actuelles seront perdues.`}
           confirmLabel="Remplacer"

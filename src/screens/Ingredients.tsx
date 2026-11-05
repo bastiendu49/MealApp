@@ -342,3 +342,22 @@ export default function Ingredients({ ingredients, setIngredients, recipes }: Pr
     </>
   )
 }
+
+/** Catalogue d'ingrédients, ouvert depuis les Réglages : on y vient rarement, il n'a plus d'onglet. */
+export function IngredientsPage({ onClose, ...props }: Props & { onClose: () => void }) {
+  useBackGuard(onClose)
+  return (
+    <div className="editor">
+      <header className="topbar">
+        <button type="button" className="link" onClick={onClose}>
+          ‹ Retour
+        </button>
+        <h1>Ingrédients · {props.ingredients.length}</h1>
+        <span />
+      </header>
+      <div className="screen">
+        <Ingredients {...props} />
+      </div>
+    </div>
+  )
+}
