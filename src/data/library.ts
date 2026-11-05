@@ -13,13 +13,14 @@ import { PLATS_4 } from './library/plats4'
 import { PLATS_5 } from './library/plats5'
 import { PLATS_6 } from './library/plats6'
 import { PLATS_7 } from './library/plats7'
+import { PLATS_8 } from './library/plats8'
 
 /**
  * Bibliothèque de recettes livrée avec l'app. Elle vit dans le code, pas sur le téléphone :
  * chaque mise à jour l'enrichit sans toucher aux données de l'utilisateur.
  * Les lots suivants s'ajoutent ici (format compact : voir library/dsl.ts).
  */
-export const LIBRARY: Recipe[] = [...BASE_RECIPES, ...JOW_FAVORITES, ...PLATS_1, ...PLATS_2, ...PLATS_3, ...PLATS_4, ...PLATS_5, ...PLATS_6, ...PLATS_7, ...FIT, ...FIT_2, ...DESSERTS_1, ...DESSERTS_2, ...DESSERTS_3]
+export const LIBRARY: Recipe[] = [...BASE_RECIPES, ...JOW_FAVORITES, ...PLATS_1, ...PLATS_2, ...PLATS_3, ...PLATS_4, ...PLATS_5, ...PLATS_6, ...PLATS_7, ...PLATS_8, ...FIT, ...FIT_2, ...DESSERTS_1, ...DESSERTS_2, ...DESSERTS_3]
 
 export const LIBRARY_IDS = new Set(LIBRARY.map((r) => r.id))
 
