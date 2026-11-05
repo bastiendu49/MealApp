@@ -134,6 +134,7 @@ describe('format compact des recettes', () => {
     expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 barbecue 2', 'Œuf 1', 'a\nb')).toThrow(/ustensile/)
     expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele', 'Œuf 1', 'a\nb')).toThrow(/incomplètes/)
     expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'une seule étape')).toThrow(/étapes/)
+    expect(() => recipe('Truite… saumon', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'a\nb')).toThrow(/…/)
   })
 })
 
