@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PROTEIN } from '../data/protein'
 import { SEASONS } from '../data/seasons'
 import {
   buildRows,
@@ -10,6 +11,7 @@ import {
   type Context,
   type Filters,
 } from '../domain/recipeFilters'
+import { HIGH_PROTEIN, proteinPerServing } from '../domain/nutrition'
 import { seasonOf } from '../domain/season'
 import { currentMonth } from '../domain/text'
 import { EQUIPMENTS, MAINS, type Course, type Equipment, type Ingredient, type Main, type Recipe } from '../domain/types'
@@ -54,7 +56,12 @@ export default function Recipes({
   const [filters, setFilters] = useState<Filters>(NO_FILTERS)
 
   const ctx: Context = useMemo(
-    () => ({ month: currentMonth(), seasons: SEASONS, ingredientById: new Map(ingredients.map((i) => [i.id, i])) }),
+    () => ({
+      month: currentMonth(),
+      seasons: SEASONS,
+      protein: PROTEIN,
+      ingredientById: new Map(ingredients.map((i) => [i.id, i])),
+    }),
     [ingredients],
   )
 
@@ -85,7 +92,7 @@ export default function Recipes({
       ...filters,
       equipment: filters.equipment.includes(e) ? filters.equipment.filter((x) => x !== e) : [...filters.equipment, e],
     })
-  const flip = (key: 'quick' | 'easy' | 'cheap' | 'season') => setFilters({ ...filters, [key]: !filters[key] })
+  const flip = (key: 'quick' | 'easy' | 'cheap' | 'season' | 'protein' | 'healthy') => setFilters({ ...filters, [key]: !filters[key] })
 
   /** Pourquoi un plat est de saison, en clair : « poireau, chou-fleur ». */
   const seasonWhy = (r: Recipe) =>
@@ -120,6 +127,9 @@ export default function Recipes({
             {r.name}
           </button>
           <span className="card-meta">{metaLine(r)}</span>
+          {proteinPerServing(r, PROTEIN) >= HIGH_PROTEIN && (
+            <span className="card-protein">💪 ≈ {proteinPerServing(r, PROTEIN)} g de protéines</span>
+          )}
           <button type="button" className="add-small" onClick={() => onAdd(r)} aria-label={`Ajouter ${r.name} au menu`}>
             <IconPlus size={16} /> Au menu
           </button>
@@ -167,6 +177,12 @@ export default function Recipes({
         ))}
       </div>
       <div className="pills">
+        <Pill on={filters.healthy} onClick={() => flip('healthy')}>
+          Healthy
+        </Pill>
+        <Pill on={filters.protein} onClick={() => flip('protein')}>
+          💪 Protéiné
+        </Pill>
         <Pill on={filters.season} onClick={() => flip('season')}>
           De saison
         </Pill>

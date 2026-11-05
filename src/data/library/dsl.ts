@@ -24,7 +24,8 @@ import { slug } from '../catalogue'
  *      Le faire dorer…`)
  *
  * - métadonnées, dans cet ordre : emoji, type, [catégorie si plat], minutes, difficulté,
- *   prix (1 à 3), ustensiles séparés par des virgules, nombre de portions ;
+ *   prix (1 à 3), ustensiles séparés par des virgules, nombre de portions, et « fit » en
+ *   dernier pour une assiette healthy complète (vérifiée par test : protéines, féculent, légumes) ;
  * - ingrédients par leur NOM du catalogue, quantité en fin (point décimal), sans quantité = « qs ».
  *   Le nom est converti en identifiant comme dans le catalogue : un test vérifie que chacun existe,
  *   une faute de frappe ferait sinon disparaître la ligne de la liste de courses ;
@@ -46,6 +47,8 @@ export function recipe(name: string, meta: string, items: string, steps: string)
     main = tokens.shift() as Main
     if (!MAINS.includes(main)) fail(`catégorie inconnue « ${main} »`)
   }
+  const healthy = tokens[tokens.length - 1] === 'fit'
+  if (healthy) tokens.pop()
   if (tokens.length !== 5) fail(`métadonnées incomplètes « ${meta} »`)
   const [minutesRaw, difficultyRaw, priceRaw, equipmentRaw, servingsRaw] = tokens
   const minutes = Number(minutesRaw)
@@ -84,5 +87,6 @@ export function recipe(name: string, meta: string, items: string, steps: string)
     price,
     emoji,
     equipment,
+    ...(healthy ? { healthy } : {}),
   }
 }

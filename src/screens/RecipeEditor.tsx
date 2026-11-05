@@ -42,6 +42,7 @@ const snapshot = (r: {
   price?: Price
   emoji: string
   equipment: Equipment[]
+  healthy: boolean
 }) => JSON.stringify(r)
 
 type Props = {
@@ -79,6 +80,7 @@ export default function RecipeEditor({
   const [price, setPrice] = useState<Price | undefined>(initial?.price)
   const [emoji, setEmoji] = useState(initial?.emoji ?? '')
   const [equipment, setEquipment] = useState<Equipment[]>(initial?.equipment ?? [])
+  const [healthy, setHealthy] = useState(initial?.healthy ?? false)
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState<string | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
@@ -105,7 +107,7 @@ export default function RecipeEditor({
   const badQty = drafts.some((d) => Number.isNaN(parseQty(d.qty)))
   const valid = !!name.trim() && servings >= 1 && !badQty && !badMinutes
 
-  const current = { name, servings, steps, drafts, course, main, minutes, difficulty, price, emoji, equipment }
+  const current = { name, servings, steps, drafts, course, main, minutes, difficulty, price, emoji, equipment, healthy }
   const [initialSnapshot] = useState(() =>
     snapshot({
       name: initial?.name ?? '',
@@ -119,6 +121,7 @@ export default function RecipeEditor({
       price: initial?.price,
       emoji: initial?.emoji ?? '',
       equipment: initial?.equipment ?? [],
+      healthy: initial?.healthy ?? false,
     }),
   )
   // La photo se compare par identité : un Blob ne se sérialise pas.
@@ -156,6 +159,7 @@ export default function RecipeEditor({
     if (price) recipe.price = price
     if (emoji.trim()) recipe.emoji = emoji.trim()
     if (equipment.length > 0) recipe.equipment = equipment
+    if (healthy) recipe.healthy = true
     onSave(recipe)
   }
 
@@ -268,6 +272,15 @@ export default function RecipeEditor({
                   {EQUIPMENT_LABEL[e]}
                 </Pill>
               ))}
+            </div>
+          </div>
+
+          <div className="field">
+            <span className="field-label">Équilibre</span>
+            <div className="pills wrap">
+              <Pill on={healthy} onClick={() => setHealthy(!healthy)}>
+                Healthy (assiette complète)
+              </Pill>
             </div>
           </div>
 

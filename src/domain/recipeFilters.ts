@@ -1,3 +1,4 @@
+import { HIGH_PROTEIN, proteinPerServing, type ProteinTable } from './nutrition'
 import { seededRandom, shuffle } from './random'
 import { seasonOf, type SeasonTable } from './season'
 import { fold, MONTHS } from './text'
@@ -16,6 +17,9 @@ export type Filters = {
   easy: boolean
   cheap: boolean
   season: boolean
+  /** Au moins HIGH_PROTEIN g de protéines estimées par portion. */
+  protein: boolean
+  healthy: boolean
 }
 
 export const NO_FILTERS: Filters = {
@@ -26,15 +30,18 @@ export const NO_FILTERS: Filters = {
   easy: false,
   cheap: false,
   season: false,
+  protein: false,
+  healthy: false,
 }
 
 export const hasFilters = (f: Filters) =>
-  f.course !== null || f.mains.length > 0 || f.equipment.length > 0 || f.quick || f.easy || f.cheap || f.season
+  f.course !== null || f.mains.length > 0 || f.equipment.length > 0 || f.quick || f.easy || f.cheap || f.season || f.protein || f.healthy
 
 export type Context = {
   month: number
   seasons: SeasonTable
   ingredientById: Map<string, Ingredient>
+  protein: ProteinTable
 }
 
 /** Sans indication, une recette est un plat : c'est le cas de tout ce qu'on saisit à la main. */
@@ -71,6 +78,8 @@ export function matchesFilters(recipe: Recipe, f: Filters, ctx: Context) {
   if (f.easy && recipe.difficulty !== 'facile') return false
   if (f.cheap && recipe.price !== 1) return false
   if (f.season && seasonOf(recipe, ctx.month, ctx.seasons).status !== 'saison') return false
+  if (f.protein && proteinPerServing(recipe, ctx.protein) < HIGH_PROTEIN) return false
+  if (f.healthy && !recipe.healthy) return false
   return true
 }
 
@@ -94,6 +103,8 @@ export function buildRows(recipes: Recipe[], ctx: Context & { day: string }): Ro
       `De saison en ${MONTHS[ctx.month - 1]}`,
       plats.filter((r) => seasonOf(r, ctx.month, ctx.seasons).status === 'saison'),
     ],
+    ['healthy', 'Healthy & sportif', plats.filter((r) => r.healthy)],
+    ['proteine', 'Riches en protéines', plats.filter((r) => proteinPerServing(r, ctx.protein) >= HIGH_PROTEIN)],
     ['rapide', `Prêtes en ${QUICK_MINUTES} minutes`, plats.filter(isQuick)],
     ['petit-prix', 'Petits prix', plats.filter((r) => r.price === 1)],
     ['vege', 'Côté végé', plats.filter((r) => r.main === 'vege')],
@@ -123,6 +134,8 @@ export type Wishes = {
   vege: boolean
   fish: boolean
   favorites: boolean
+  protein: boolean
+  healthy: boolean
 }
 
 export const NO_WISHES: Wishes = {
@@ -132,6 +145,8 @@ export const NO_WISHES: Wishes = {
   vege: false,
   fish: false,
   favorites: false,
+  protein: false,
+  healthy: false,
 }
 
 /**
@@ -155,6 +170,8 @@ export function menuPool(
     if (wishes.cheap && r.price !== 1) return false
     if (mains.length > 0 && (!r.main || !mains.includes(r.main))) return false
     if (wishes.season && seasonOf(r, ctx.month, ctx.seasons).status === 'hors-saison') return false
+    if (wishes.protein && proteinPerServing(r, ctx.protein) < HIGH_PROTEIN) return false
+    if (wishes.healthy && !r.healthy) return false
     return true
   })
 }

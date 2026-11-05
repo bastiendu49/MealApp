@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react'
+import { PROTEIN } from '../data/protein'
 import { SEASONS } from '../data/seasons'
+import { proteinPerServing } from '../domain/nutrition'
 import { seasonOf } from '../domain/season'
 import { formatQty, scaleRecipe } from '../domain/shoppingList'
 import { currentMonth } from '../domain/text'
@@ -85,6 +87,10 @@ export default function RecipeSheet({
       <div className="recipe-body">
         <h1>{recipe.name}</h1>
         <ul className="chips">
+          {recipe.healthy && <li className="good">Healthy</li>}
+          {proteinPerServing(recipe, PROTEIN) > 0 && (
+            <li>💪 ≈ {proteinPerServing(recipe, PROTEIN)} g protéines / pers.</li>
+          )}
           {recipe.minutes && <li>⏱ {recipe.minutes} min</li>}
           {recipe.difficulty && <li>{DIFFICULTY_LABEL[recipe.difficulty]}</li>}
           {recipe.price && <li>{priceLabel(recipe.price)}</li>}

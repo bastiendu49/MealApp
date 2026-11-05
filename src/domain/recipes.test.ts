@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { CATALOGUE } from '../data/catalogue'
+import { PROTEIN } from '../data/protein'
 import { SEASONS } from '../data/seasons'
 import { generateMenu, pickReplacement } from './generator'
 import { missingIngredients, pruneUnchangedCopies, resolveRecipes } from './library'
@@ -20,7 +21,7 @@ import type { Main, Recipe } from './types'
 const ingredientById = new Map(CATALOGUE.map((i) => [i.id, i]))
 const NOVEMBRE = 11
 const JUILLET = 7
-const ctx: Context = { month: NOVEMBRE, seasons: SEASONS, ingredientById }
+const ctx: Context = { month: NOVEMBRE, seasons: SEASONS, ingredientById, protein: PROTEIN }
 
 /** Recette de test : seuls comptent les champs que chaque test précise. */
 const recipe = (id: string, over: Partial<Recipe> = {}): Recipe => ({

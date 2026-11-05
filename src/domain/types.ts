@@ -73,6 +73,8 @@ export type Recipe = {
   emoji?: string
   /** Ce qu'il faut pour la cuisson. Plusieurs = au choix ou ensemble (« four ou airfryer »). */
   equipment?: Equipment[]
+  /** Assiette complète et équilibrée pour sportif : protéine maigre, féculent, légumes. */
+  healthy?: boolean
 }
 
 /** Un repas ajouté deux fois = deux entrées, éventuellement avec des convives différents. */

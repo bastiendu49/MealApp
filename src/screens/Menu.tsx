@@ -36,6 +36,8 @@ const WISHES: [keyof Wishes, string][] = [
   ['season', 'De saison'],
   ['quick', `≤ ${QUICK_MINUTES} min`],
   ['cheap', 'Petit prix'],
+  ['healthy', 'Healthy'],
+  ['protein', '💪 Protéiné'],
   ['vege', 'Végé'],
   ['fish', 'Poisson'],
   ['favorites', 'Que mes repas ♥'],

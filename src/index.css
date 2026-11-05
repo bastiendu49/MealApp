@@ -799,6 +799,12 @@ button:disabled {
   color: var(--muted);
 }
 
+.card-protein {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--good);
+}
+
 .add-small {
   display: inline-flex;
   align-items: center;

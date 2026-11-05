@@ -182,7 +182,7 @@ export function parseBackup(text: string): Result {
 }
 
 /** Métadonnées facultatives : une valeur inconnue est ignorée, jamais une cause de refus. */
-type Metadata = Partial<Pick<Recipe, 'course' | 'main' | 'minutes' | 'difficulty' | 'price' | 'emoji' | 'equipment'>>
+type Metadata = Partial<Pick<Recipe, 'course' | 'main' | 'minutes' | 'difficulty' | 'price' | 'emoji' | 'equipment' | 'healthy'>>
 
 function metadata(entry: Record<string, unknown>): Metadata {
   const out: Metadata = {}
@@ -199,5 +199,6 @@ function metadata(entry: Record<string, unknown>): Metadata {
     const equipment = entry.equipment.filter((e): e is Equipment => EQUIPMENTS.includes(e as never))
     if (equipment.length > 0) out.equipment = equipment
   }
+  if (entry.healthy === true) out.healthy = true
   return out
 }

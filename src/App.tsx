@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { CATALOGUE } from './data/catalogue'
 import { INITIAL_FAVORITES, LIBRARY, LIBRARY_IDS } from './data/library'
+import { PROTEIN } from './data/protein'
 import { SEASONS } from './data/seasons'
 import type { Backup } from './domain/backup'
 import { missingIngredients, pruneUnchangedCopies, resolveRecipes } from './domain/library'
@@ -117,6 +118,7 @@ export default function App() {
       month: currentMonth(),
       seasons: SEASONS,
       ingredientById: new Map(ingredients.map((i) => [i.id, i])),
+      protein: PROTEIN,
       favorites,
     }),
     [ingredients, favorites],
