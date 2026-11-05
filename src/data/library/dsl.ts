@@ -72,7 +72,7 @@ export function recipe(name: string, meta: string, items: string, steps: string)
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean)
-  if (lines.length < 2) fail('il faut au moins deux étapes')
+  if (lines.length < 3) fail('il faut au moins trois étapes')
   // Un « … » dans un titre ou un ingrédient trahit une hésitation de rédaction restée en
   // place (« Truite… saumon ») : le titre doit dire exactement ce qu'est le plat.
   if (name.includes('…') || items.includes('…')) fail('« … » dans le titre ou les ingrédients')

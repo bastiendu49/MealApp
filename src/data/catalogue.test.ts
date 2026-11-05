@@ -102,7 +102,8 @@ describe('format compact des recettes', () => {
       '🍳 plat vege 10 facile 1 poele,four 2',
       'Œuf 3, Beurre 10.5, Sel',
       `Battre les œufs.
-       Cuire doucement.`,
+       Cuire doucement.
+       Servir aussitôt.`,
     )
     expect(r).toMatchObject({
       id: 'lib-test-ufs-brouilles',
@@ -114,7 +115,7 @@ describe('format compact des recettes', () => {
       equipment: ['poele', 'four'],
       servings: 2,
       emoji: '🍳',
-      steps: 'Battre les œufs.\nCuire doucement.',
+      steps: 'Battre les œufs.\nCuire doucement.\nServir aussitôt.',
     })
     expect(r.items).toEqual([
       { ingredientId: 'uf', qty: 3 },
@@ -124,17 +125,17 @@ describe('format compact des recettes', () => {
   })
 
   it('un dessert n’a pas de catégorie', () => {
-    const r = recipe('Test gâteau', '🍰 dessert 30 facile 1 four 6', 'Farine 100', 'a\nb')
+    const r = recipe('Test gâteau', '🍰 dessert 30 facile 1 four 6', 'Farine 100', 'a\nb\nc')
     expect(r.course).toBe('dessert')
     expect(r.main).toBeUndefined()
   })
 
   it('refuse une recette mal décrite en la nommant', () => {
-    expect(() => recipe('Bancale', '🍳 plat licorne 10 facile 1 poele 2', 'Œuf 1', 'a\nb')).toThrow(/Bancale.*catégorie/)
-    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 barbecue 2', 'Œuf 1', 'a\nb')).toThrow(/ustensile/)
-    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele', 'Œuf 1', 'a\nb')).toThrow(/incomplètes/)
-    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'une seule étape')).toThrow(/étapes/)
-    expect(() => recipe('Truite… saumon', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'a\nb')).toThrow(/…/)
+    expect(() => recipe('Bancale', '🍳 plat licorne 10 facile 1 poele 2', 'Œuf 1', 'a\nb\nc')).toThrow(/Bancale.*catégorie/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 barbecue 2', 'Œuf 1', 'a\nb\nc')).toThrow(/ustensile/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele', 'Œuf 1', 'a\nb\nc')).toThrow(/incomplètes/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'une étape\npuis une autre')).toThrow(/étapes/)
+    expect(() => recipe('Truite… saumon', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'a\nb\nc')).toThrow(/…/)
   })
 })
 

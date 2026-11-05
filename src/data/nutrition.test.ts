@@ -27,14 +27,14 @@ describe('protéines estimées', () => {
       'Test protéines',
       '🍗 plat volaille 20 facile 1 poele 2',
       'Blanc de poulet 2, Riz 150, Œuf 2, Huile d\'olive',
-      'a\nb',
+      'a\nb\nc',
     )
     // (2 × 34 + 150 × 0,07 + 2 × 6,5) / 2 = 45,75
     expect(proteinPerServing(r, PROTEIN)).toBe(46)
   })
 
   it('suit le nombre de portions de la recette', () => {
-    const pour4 = recipe('Test x4', '🍗 plat volaille 20 facile 1 poele 4', 'Blanc de poulet 4', 'a\nb')
+    const pour4 = recipe('Test x4', '🍗 plat volaille 20 facile 1 poele 4', 'Blanc de poulet 4', 'a\nb\nc')
     expect(proteinPerServing(pour4, PROTEIN)).toBe(34)
   })
 })
