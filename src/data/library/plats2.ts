@@ -8,13 +8,13 @@ export const PLATS_2 = [
   // ---------------------------------------------------------------- airfryer
   recipe(
     'Butternut rôtie au miel & à l\'ail, chèvre & lardons',
-    '🎃 plat viande 35 facile 1 airfryer 2',
-    'Courge butternut 1, Miel 30, Ail 2, Lardons fumés 120, Bûche de chèvre 100, Thym, Huile d\'olive, Sel, Poivre',
-    `Couper la butternut en deux, retirer les graines et la tailler en cubes de 2 cm (la peau se mange une fois rôtie).
-     Mélanger avec 2 c. à s. d'huile, l'ail écrasé, le thym, sel et poivre.
-     Cuire 15 minutes à 200 °C à l'airfryer en secouant à mi-cuisson.
-     Ajouter les lardons et le miel, mélanger et poursuivre 8 minutes : la courge doit être fondante et caramélisée.
-     Parsemer de chèvre émietté, laisser 2 minutes dans la cuve pour qu'il tiédisse, puis servir.`,
+    '🎃 plat viande 45 facile 1 airfryer 2',
+    'Courge butternut 1, Miel 40, Ail 1, Huile d\'olive 45, Graines de sésame 10, Lardons fumés 75, Bûche de chèvre 100, Sel',
+    `Éplucher la butternut, retirer les graines, la rincer rapidement et la couper en cubes d'environ 1 cm (650 g).
+     Dans un bol, mélanger 2 c. à s. de miel, 3 c. à s. d'huile d'olive et une pincée de sel ; en enrober les cubes.
+     Ajouter l'ail râpé et le sésame, mélanger à nouveau.
+     Cuire 20 à 25 minutes à 180 °C à l'airfryer (mode frites) ; à mi-cuisson, mélanger et ajouter les lardons.
+     Parsemer d'une demi-bûche de chèvre émiettée et laisser 2 minutes dans la cuve pour qu'il fonde légèrement.`,
   ),
   recipe(
     'Ailes de poulet barbecue & coleslaw',
