@@ -3,7 +3,9 @@ import { CATALOGUE, slug } from './catalogue'
 import { AISLES } from '../domain/types'
 import { LIBRARY } from './library'
 import { SEASONS } from './seasons'
-import { COURSES, DIFFICULTIES, MAINS, PRICES } from '../domain/types'
+import { COURSES, DIFFICULTIES, EQUIPMENTS, MAINS, PRICES } from '../domain/types'
+import { fold } from '../domain/text'
+import { recipe } from './library/dsl'
 
 describe('catalogue de départ', () => {
   it('n’a aucun identifiant en double', () => {
@@ -90,5 +92,76 @@ describe('table des saisons', () => {
 
   it('fait passer l’hiver du poireau par janvier', () => {
     expect(SEASONS.poireau).toEqual([9, 10, 11, 12, 1, 2, 3])
+  })
+})
+
+describe('format compact des recettes', () => {
+  it('lit métadonnées, ingrédients par leur nom, « qs » et étapes', () => {
+    const r = recipe(
+      'Test œufs brouillés',
+      '🍳 plat vege 10 facile 1 poele,four 2',
+      'Œuf 3, Beurre 10.5, Sel',
+      `Battre les œufs.
+       Cuire doucement.`,
+    )
+    expect(r).toMatchObject({
+      id: 'lib-test-ufs-brouilles',
+      course: 'plat',
+      main: 'vege',
+      minutes: 10,
+      difficulty: 'facile',
+      price: 1,
+      equipment: ['poele', 'four'],
+      servings: 2,
+      emoji: '🍳',
+      steps: 'Battre les œufs.\nCuire doucement.',
+    })
+    expect(r.items).toEqual([
+      { ingredientId: 'uf', qty: 3 },
+      { ingredientId: 'beurre', qty: 10.5 },
+      { ingredientId: 'sel', qty: null },
+    ])
+  })
+
+  it('un dessert n’a pas de catégorie', () => {
+    const r = recipe('Test gâteau', '🍰 dessert 30 facile 1 four 6', 'Farine 100', 'a\nb')
+    expect(r.course).toBe('dessert')
+    expect(r.main).toBeUndefined()
+  })
+
+  it('refuse une recette mal décrite en la nommant', () => {
+    expect(() => recipe('Bancale', '🍳 plat licorne 10 facile 1 poele 2', 'Œuf 1', 'a\nb')).toThrow(/Bancale.*catégorie/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 barbecue 2', 'Œuf 1', 'a\nb')).toThrow(/ustensile/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele', 'Œuf 1', 'a\nb')).toThrow(/incomplètes/)
+    expect(() => recipe('Bancale', '🍳 plat vege 10 facile 1 poele 2', 'Œuf 1', 'une seule étape')).toThrow(/étapes/)
+  })
+})
+
+describe('bibliothèque — cohérence', () => {
+  it('n’a pas deux recettes du même nom', () => {
+    const names = LIBRARY.map((r) => fold(r.name))
+    expect(names.filter((n, i) => names.indexOf(n) !== i)).toEqual([])
+  })
+
+  it('ne cite pas deux fois le même ingrédient dans une recette', () => {
+    // Deux lignes pour un même ingrédient s'additionnent sans erreur, mais trahissent presque
+    // toujours une faute de saisie (« Ail 1 » oublié plus haut).
+    const doubles = LIBRARY.flatMap((r) => {
+      const ids = r.items.map((i) => i.ingredientId)
+      return ids.filter((id, i) => ids.indexOf(id) !== i).map((id) => `${r.name} → ${id}`)
+    })
+    expect(doubles).toEqual([])
+  })
+
+  it('n’a aucun nom d’ingrédient en double dans le catalogue, accents compris', () => {
+    const names = CATALOGUE.map((i) => fold(i.name))
+    expect(names.filter((n, i) => names.indexOf(n) !== i)).toEqual([])
+  })
+
+  it('indique des ustensiles connus pour chaque recette', () => {
+    for (const r of LIBRARY.filter((r) => r.id.startsWith('lib-'))) {
+      expect(r.equipment?.length, r.name).toBeGreaterThan(0)
+      for (const e of r.equipment!) expect(EQUIPMENTS, r.name).toContain(e)
+    }
   })
 })

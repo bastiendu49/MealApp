@@ -48,6 +48,10 @@ export type Difficulty = (typeof DIFFICULTIES)[number]
 export const PRICES = [1, 2, 3] as const
 export type Price = (typeof PRICES)[number]
 
+/** Ustensiles de cuisson, pour choisir selon ce qu'on a sous la main ou l'envie du soir. */
+export const EQUIPMENTS = ['four', 'poele', 'airfryer', 'casserole', 'sans-cuisson'] as const
+export type Equipment = (typeof EQUIPMENTS)[number]
+
 export type Recipe = {
   id: string
   name: string
@@ -67,6 +71,8 @@ export type Recipe = {
   price?: Price
   /** Vignette quand il n'y a pas de photo. */
   emoji?: string
+  /** Ce qu'il faut pour la cuisson. Plusieurs = au choix ou ensemble (« four ou airfryer »). */
+  equipment?: Equipment[]
 }
 
 /** Un repas ajouté deux fois = deux entrées, éventuellement avec des convives différents. */

@@ -1,4 +1,4 @@
-import type { Difficulty, Main, Price, Recipe } from '../domain/types'
+import type { Difficulty, Equipment, Main, Price, Recipe } from '../domain/types'
 
 export const MAIN_LABEL: Record<Main, string> = {
   viande: 'Viande',
@@ -11,6 +11,14 @@ export const DIFFICULTY_LABEL: Record<Difficulty, string> = {
   facile: 'Facile',
   moyen: 'Moyen',
   difficile: 'Difficile',
+}
+
+export const EQUIPMENT_LABEL: Record<Equipment, string> = {
+  four: 'Four',
+  poele: 'Poêle',
+  airfryer: 'Airfryer',
+  casserole: 'Casserole',
+  'sans-cuisson': 'Sans cuisson',
 }
 
 export const priceLabel = (p: Price) => '€'.repeat(p)

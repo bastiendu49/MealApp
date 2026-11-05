@@ -3,10 +3,12 @@ import { uid } from '../domain/store'
 import { fold } from '../domain/text'
 import {
   DIFFICULTIES,
+  EQUIPMENTS,
   MAINS,
   PRICES,
   type Course,
   type Difficulty,
+  type Equipment,
   type Ingredient,
   type Main,
   type Price,
@@ -17,7 +19,7 @@ import { Confirm } from '../lib/Confirm'
 import { compressPhoto, useObjectUrl } from '../lib/photo'
 import { useBackGuard } from '../lib/useBackGuard'
 import { Pill, Stepper } from './common'
-import { DIFFICULTY_LABEL, MAIN_LABEL, priceLabel } from './labels'
+import { DIFFICULTY_LABEL, EQUIPMENT_LABEL, MAIN_LABEL, priceLabel } from './labels'
 import { IngredientForm } from './Ingredients'
 import type { EditFocus } from './RecipeSheet'
 
@@ -39,6 +41,7 @@ const snapshot = (r: {
   difficulty?: Difficulty
   price?: Price
   emoji: string
+  equipment: Equipment[]
 }) => JSON.stringify(r)
 
 type Props = {
@@ -75,6 +78,7 @@ export default function RecipeEditor({
   const [difficulty, setDifficulty] = useState<Difficulty | undefined>(initial?.difficulty)
   const [price, setPrice] = useState<Price | undefined>(initial?.price)
   const [emoji, setEmoji] = useState(initial?.emoji ?? '')
+  const [equipment, setEquipment] = useState<Equipment[]>(initial?.equipment ?? [])
   const [query, setQuery] = useState('')
   const [creating, setCreating] = useState<string | null>(null)
   const [photoError, setPhotoError] = useState<string | null>(null)
@@ -101,7 +105,7 @@ export default function RecipeEditor({
   const badQty = drafts.some((d) => Number.isNaN(parseQty(d.qty)))
   const valid = !!name.trim() && servings >= 1 && !badQty && !badMinutes
 
-  const current = { name, servings, steps, drafts, course, main, minutes, difficulty, price, emoji }
+  const current = { name, servings, steps, drafts, course, main, minutes, difficulty, price, emoji, equipment }
   const [initialSnapshot] = useState(() =>
     snapshot({
       name: initial?.name ?? '',
@@ -114,6 +118,7 @@ export default function RecipeEditor({
       difficulty: initial?.difficulty,
       price: initial?.price,
       emoji: initial?.emoji ?? '',
+      equipment: initial?.equipment ?? [],
     }),
   )
   // La photo se compare par identité : un Blob ne se sérialise pas.
@@ -150,6 +155,7 @@ export default function RecipeEditor({
     if (difficulty) recipe.difficulty = difficulty
     if (price) recipe.price = price
     if (emoji.trim()) recipe.emoji = emoji.trim()
+    if (equipment.length > 0) recipe.equipment = equipment
     onSave(recipe)
   }
 
@@ -247,6 +253,23 @@ export default function RecipeEditor({
               </div>
             </div>
           )}
+
+          <div className="field">
+            <span className="field-label">Cuisson</span>
+            <div className="pills wrap">
+              {EQUIPMENTS.map((e) => (
+                <Pill
+                  key={e}
+                  on={equipment.includes(e)}
+                  onClick={() =>
+                    setEquipment(equipment.includes(e) ? equipment.filter((x) => x !== e) : [...equipment, e])
+                  }
+                >
+                  {EQUIPMENT_LABEL[e]}
+                </Pill>
+              ))}
+            </div>
+          </div>
 
           <div className="field">
             <span className="field-label">Difficulté</span>

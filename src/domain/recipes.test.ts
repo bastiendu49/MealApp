@@ -264,3 +264,29 @@ describe('bibliothèque et recettes stockées', () => {
     expect(missingIngredients(present, [r], CATALOGUE).map((i) => i.id)).toEqual(['poireau'])
   })
 })
+
+describe('ustensiles', () => {
+  const four = recipe('four', { equipment: ['four'] })
+  const fourOuAir = recipe('four-air', { equipment: ['four', 'airfryer'] })
+  const poele = recipe('poele', { equipment: ['poele'] })
+  const poeleEtCasserole = recipe('poele-casserole', { equipment: ['poele', 'casserole'] })
+  const all = [four, fourOuAir, poele, poeleEtCasserole, recipe('poele2', { equipment: ['poele'] })]
+
+  it('filtre sur l’un ou l’autre des ustensiles cochés', () => {
+    const ids = (equipment: ('four' | 'airfryer' | 'poele')[]) =>
+      all.filter((r) => matchesFilters(r, { ...NO_FILTERS, equipment }, ctx)).map((r) => r.id)
+    expect(ids(['airfryer'])).toEqual(['four-air'])
+    expect(ids(['airfryer', 'poele'])).toEqual(['four-air', 'poele', 'poele-casserole', 'poele2'])
+  })
+
+  it('« Juste une poêle » écarte ce qui demande aussi une casserole', () => {
+    const row = buildRows(all, { ...ctx, day: 'j' }).find((r) => r.id === 'poele')!
+    expect(row.recipes.map((r) => r.id).sort()).toEqual(['poele', 'poele2'])
+  })
+
+  it('« Tout au four » accepte « four ou airfryer » mais pas l’airfryer seul', () => {
+    const rows = buildRows([...all, recipe('air', { equipment: ['airfryer'] })], { ...ctx, day: 'j' })
+    expect(rows.find((r) => r.id === 'four')!.recipes.map((r) => r.id).sort()).toEqual(['four', 'four-air'])
+    expect(rows.find((r) => r.id === 'airfryer')!.recipes.map((r) => r.id).sort()).toEqual(['air', 'four-air'])
+  })
+})

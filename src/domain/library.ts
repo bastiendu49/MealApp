@@ -22,8 +22,8 @@ export function resolveRecipes(library: Recipe[], stored: Recipe[]): Recipe[] {
   ]
 }
 
-const metadataOf = ({ course, main, minutes, difficulty, price, emoji }: Recipe) =>
-  stripUndefined({ course, main, minutes, difficulty, price, emoji })
+const metadataOf = ({ course, main, minutes, difficulty, price, emoji, equipment }: Recipe) =>
+  stripUndefined({ course, main, minutes, difficulty, price, emoji, equipment })
 
 const stripUndefined = <T extends object>(o: T): T =>
   Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T

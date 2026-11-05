@@ -12,7 +12,7 @@ const steps = (...lines: string[]) => lines.join('\n')
 export const BASE_RECIPES: Recipe[] = [
   {
     id: 'base-tartelette-pesto',
-    course: 'plat', main: 'vege', minutes: 40, difficulty: 'facile', price: 1, emoji: '🥧',
+    course: 'plat', main: 'vege', minutes: 40, difficulty: 'facile', price: 1, emoji: '🥧', equipment: ['four'],
     name: 'Tartelette pesto, tomates & salade',
     servings: 2,
     items: [
@@ -38,7 +38,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-mafe',
-    course: 'plat', main: 'volaille', minutes: 55, difficulty: 'moyen', price: 1, emoji: '🥘',
+    course: 'plat', main: 'volaille', minutes: 55, difficulty: 'moyen', price: 1, emoji: '🥘', equipment: ['casserole'],
     name: 'Poulet façon mafé & riz',
     servings: 2,
     items: [
@@ -69,7 +69,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-caprese',
-    course: 'plat', main: 'volaille', minutes: 40, difficulty: 'facile', price: 2, emoji: '🍅',
+    course: 'plat', main: 'volaille', minutes: 40, difficulty: 'facile', price: 2, emoji: '🍅', equipment: ['four'],
     name: 'One pan poulet caprese',
     servings: 2,
     items: [
@@ -95,7 +95,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-tandoori',
-    course: 'plat', main: 'volaille', minutes: 30, difficulty: 'facile', price: 1, emoji: '🍛',
+    course: 'plat', main: 'volaille', minutes: 30, difficulty: 'facile', price: 1, emoji: '🍛', equipment: ['four'],
     name: 'Poulet tandoori',
     servings: 2,
     items: [
@@ -122,7 +122,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-tartelette-chevre-miel',
-    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 2, emoji: '🧀',
+    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 2, emoji: '🧀', equipment: ['four'],
     name: 'Tartelette chèvre miel & salade',
     servings: 2,
     items: [
@@ -147,7 +147,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-galette-complete',
-    course: 'plat', main: 'viande', minutes: 15, difficulty: 'facile', price: 1, emoji: '🥞',
+    course: 'plat', main: 'viande', minutes: 15, difficulty: 'facile', price: 1, emoji: '🥞', equipment: ['poele'],
     name: 'Galette complète',
     servings: 2,
     items: [
@@ -170,7 +170,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-feuillete-epinard-feta',
-    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 1, emoji: '🥬',
+    course: 'plat', main: 'vege', minutes: 35, difficulty: 'facile', price: 1, emoji: '🥬', equipment: ['four'],
     name: 'Feuilletés épinard, feta & salade',
     servings: 2,
     items: [
@@ -198,7 +198,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-feuillete-chevre-miel',
-    course: 'plat', main: 'vege', minutes: 30, difficulty: 'facile', price: 2, emoji: '🥐',
+    course: 'plat', main: 'vege', minutes: 30, difficulty: 'facile', price: 2, emoji: '🥐', equipment: ['four'],
     name: 'Feuilleté chèvre miel & salade',
     servings: 2,
     items: [
@@ -225,7 +225,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-quiche-lorraine',
-    course: 'plat', main: 'viande', minutes: 55, difficulty: 'facile', price: 1, emoji: '🥧',
+    course: 'plat', main: 'viande', minutes: 55, difficulty: 'facile', price: 1, emoji: '🥧', equipment: ['four'],
     name: 'Quiche lorraine',
     servings: 4,
     items: [
@@ -251,7 +251,7 @@ export const BASE_RECIPES: Recipe[] = [
   },
   {
     id: 'base-poulet-grecque',
-    course: 'plat', main: 'volaille', minutes: 50, difficulty: 'facile', price: 2, emoji: '🍗',
+    course: 'plat', main: 'volaille', minutes: 50, difficulty: 'facile', price: 2, emoji: '🍗', equipment: ['four'],
     name: 'One pan poulet à la grecque',
     servings: 2,
     items: [

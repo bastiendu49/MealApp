@@ -7,7 +7,7 @@ import type { CartEntry, Ingredient, Recipe } from '../domain/types'
 import { IconBack, IconClose, IconEdit, IconHeart, IconPlus } from '../lib/icons'
 import { useBackGuard } from '../lib/useBackGuard'
 import { Stepper, Thumb } from './common'
-import { DIFFICULTY_LABEL, MAIN_LABEL, people, priceLabel } from './labels'
+import { DIFFICULTY_LABEL, EQUIPMENT_LABEL, MAIN_LABEL, people, priceLabel } from './labels'
 
 export type EditFocus = 'steps' | 'items' | undefined
 
@@ -89,6 +89,7 @@ export default function RecipeSheet({
           {recipe.difficulty && <li>{DIFFICULTY_LABEL[recipe.difficulty]}</li>}
           {recipe.price && <li>{priceLabel(recipe.price)}</li>}
           {recipe.course === 'dessert' ? <li>Dessert</li> : recipe.main && <li>{MAIN_LABEL[recipe.main]}</li>}
+          {recipe.equipment && <li>{recipe.equipment.map((e) => EQUIPMENT_LABEL[e]).join(' ou ')}</li>}
           {season.status === 'saison' && <li className="good">De saison</li>}
           {season.status === 'hors-saison' && (
             <li className="off">Hors saison : {season.outOfSeason.map(nameOf).join(', ')}</li>

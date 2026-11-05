@@ -12,10 +12,10 @@ import {
 } from '../domain/recipeFilters'
 import { seasonOf } from '../domain/season'
 import { currentMonth } from '../domain/text'
-import { MAINS, type Course, type Ingredient, type Main, type Recipe } from '../domain/types'
+import { EQUIPMENTS, MAINS, type Course, type Equipment, type Ingredient, type Main, type Recipe } from '../domain/types'
 import { IconHeart, IconPlus, IconSearch } from '../lib/icons'
 import { Pill, ScreenHeader, Thumb } from './common'
-import { MAIN_LABEL, metaLine } from './labels'
+import { EQUIPMENT_LABEL, MAIN_LABEL, metaLine } from './labels'
 
 type Segment = 'library' | 'mine'
 
@@ -79,6 +79,11 @@ export default function Recipes({
     setFilters({
       ...filters,
       mains: filters.mains.includes(m) ? filters.mains.filter((x) => x !== m) : [...filters.mains, m],
+    })
+  const toggleEquipment = (e: Equipment) =>
+    setFilters({
+      ...filters,
+      equipment: filters.equipment.includes(e) ? filters.equipment.filter((x) => x !== e) : [...filters.equipment, e],
     })
   const flip = (key: 'quick' | 'easy' | 'cheap' | 'season') => setFilters({ ...filters, [key]: !filters[key] })
 
@@ -174,6 +179,13 @@ export default function Recipes({
         <Pill on={filters.cheap} onClick={() => flip('cheap')}>
           € Petit prix
         </Pill>
+      </div>
+      <div className="pills">
+        {EQUIPMENTS.map((e) => (
+          <Pill key={e} on={filters.equipment.includes(e)} onClick={() => toggleEquipment(e)}>
+            {EQUIPMENT_LABEL[e]}
+          </Pill>
+        ))}
         {hasFilters(filters) && (
           <button type="button" className="pill clear" onClick={() => setFilters(NO_FILTERS)}>
             Effacer

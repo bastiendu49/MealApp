@@ -1,7 +1,7 @@
 import { seededRandom, shuffle } from './random'
 import { seasonOf, type SeasonTable } from './season'
 import { fold, MONTHS } from './text'
-import type { Course, Ingredient, Main, Recipe } from './types'
+import type { Course, Equipment, Ingredient, Main, Recipe } from './types'
 
 /** Seuil des filtres « rapide » : temps total, préparation et cuisson comprises. */
 export const QUICK_MINUTES = 30
@@ -10,6 +10,8 @@ export type Filters = {
   course: Course | null
   /** Plusieurs ingrédients principaux cochés = l'un ou l'autre. */
   mains: Main[]
+  /** Plusieurs ustensiles cochés = l'un ou l'autre. */
+  equipment: Equipment[]
   quick: boolean
   easy: boolean
   cheap: boolean
@@ -19,6 +21,7 @@ export type Filters = {
 export const NO_FILTERS: Filters = {
   course: null,
   mains: [],
+  equipment: [],
   quick: false,
   easy: false,
   cheap: false,
@@ -26,7 +29,7 @@ export const NO_FILTERS: Filters = {
 }
 
 export const hasFilters = (f: Filters) =>
-  f.course !== null || f.mains.length > 0 || f.quick || f.easy || f.cheap || f.season
+  f.course !== null || f.mains.length > 0 || f.equipment.length > 0 || f.quick || f.easy || f.cheap || f.season
 
 export type Context = {
   month: number
@@ -36,6 +39,10 @@ export type Context = {
 
 /** Sans indication, une recette est un plat : c'est le cas de tout ce qu'on saisit à la main. */
 export const courseOf = (r: Recipe): Course => r.course ?? 'plat'
+
+/** Ne demande rien d'autre que ces ustensiles (le four ou l'airfryer au choix compte pour un). */
+const only = (r: Recipe, ...allowed: Equipment[]) =>
+  !!r.equipment?.length && r.equipment.every((e) => allowed.includes(e))
 
 const isQuick = (r: Recipe) => r.minutes !== undefined && r.minutes <= QUICK_MINUTES
 
@@ -59,6 +66,7 @@ export function matchesQuery(recipe: Recipe, query: string, ingredientById: Map<
 export function matchesFilters(recipe: Recipe, f: Filters, ctx: Context) {
   if (f.course !== null && courseOf(recipe) !== f.course) return false
   if (f.mains.length > 0 && (!recipe.main || !f.mains.includes(recipe.main))) return false
+  if (f.equipment.length > 0 && !recipe.equipment?.some((e) => f.equipment.includes(e))) return false
   if (f.quick && !isQuick(recipe)) return false
   if (f.easy && recipe.difficulty !== 'facile') return false
   if (f.cheap && recipe.price !== 1) return false
@@ -89,6 +97,10 @@ export function buildRows(recipes: Recipe[], ctx: Context & { day: string }): Ro
     ['rapide', `Prêtes en ${QUICK_MINUTES} minutes`, plats.filter(isQuick)],
     ['petit-prix', 'Petits prix', plats.filter((r) => r.price === 1)],
     ['vege', 'Côté végé', plats.filter((r) => r.main === 'vege')],
+    ['airfryer', 'À l’airfryer', plats.filter((r) => r.equipment?.includes('airfryer'))],
+    ['poele', 'Juste une poêle', plats.filter((r) => only(r, 'poele'))],
+    ['four', 'Tout au four', plats.filter((r) => only(r, 'four', 'airfryer') && r.equipment!.includes('four'))],
+    ['sans-cuisson', 'Sans cuisson', recipes.filter((r) => only(r, 'sans-cuisson'))],
     ['poisson', 'Côté mer', plats.filter((r) => r.main === 'poisson')],
     ['facile', 'Sans se compliquer', plats.filter((r) => r.difficulty === 'facile' && isQuick(r))],
     ['dessert', 'Pour finir en douceur', recipes.filter((r) => courseOf(r) === 'dessert')],

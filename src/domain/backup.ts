@@ -2,10 +2,12 @@ import {
   AISLES,
   COURSES,
   DIFFICULTIES,
+  EQUIPMENTS,
   MAINS,
   PRICES,
   type Aisle,
   type CartEntry,
+  type Equipment,
   type Checked,
   type Extra,
   type Ingredient,
@@ -180,7 +182,7 @@ export function parseBackup(text: string): Result {
 }
 
 /** Métadonnées facultatives : une valeur inconnue est ignorée, jamais une cause de refus. */
-type Metadata = Partial<Pick<Recipe, 'course' | 'main' | 'minutes' | 'difficulty' | 'price' | 'emoji'>>
+type Metadata = Partial<Pick<Recipe, 'course' | 'main' | 'minutes' | 'difficulty' | 'price' | 'emoji' | 'equipment'>>
 
 function metadata(entry: Record<string, unknown>): Metadata {
   const out: Metadata = {}
@@ -193,5 +195,9 @@ function metadata(entry: Record<string, unknown>): Metadata {
   const minutes = Number(entry.minutes)
   if (entry.minutes !== undefined && Number.isFinite(minutes) && minutes > 0) out.minutes = minutes
   if (typeof entry.emoji === 'string' && entry.emoji.trim()) out.emoji = entry.emoji.trim()
+  if (Array.isArray(entry.equipment)) {
+    const equipment = entry.equipment.filter((e): e is Equipment => EQUIPMENTS.includes(e as never))
+    if (equipment.length > 0) out.equipment = equipment
+  }
   return out
 }
