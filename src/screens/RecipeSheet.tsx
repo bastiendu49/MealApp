@@ -95,7 +95,9 @@ export default function RecipeSheet({
           {recipe.difficulty && <li>{DIFFICULTY_LABEL[recipe.difficulty]}</li>}
           {recipe.price && <li>{priceLabel(recipe.price)}</li>}
           {recipe.course === 'dessert' ? <li>Dessert</li> : recipe.main && <li>{MAIN_LABEL[recipe.main]}</li>}
-          {recipe.equipment && <li>{recipe.equipment.map((e) => EQUIPMENT_LABEL[e]).join(' ou ')}</li>}
+          {/* « · » plutôt que « ou » : selon la recette, plusieurs ustensiles sont au choix
+              (four ou airfryer) ou s'utilisent ensemble (poêle et casserole). */}
+          {recipe.equipment && <li>{recipe.equipment.map((e) => EQUIPMENT_LABEL[e]).join(' · ')}</li>}
           {season.status === 'saison' && <li className="good">De saison</li>}
           {season.status === 'hors-saison' && (
             <li className="off">Hors saison : {season.outOfSeason.map(nameOf).join(', ')}</li>

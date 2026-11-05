@@ -6,6 +6,10 @@ const BUILD = new Date().toISOString().slice(0, 16).replace('T', ' ')
 
 export default defineConfig({
   define: { __BUILD__: JSON.stringify(BUILD) },
+  // La bibliothèque de ~1000 recettes est dans le bundle, volontairement : elle doit marcher
+  // hors ligne dès l'installation. ~190 Ko compressés, précachés par le service worker.
+  // ponytail: un seul chunk ; si ça grossit encore, charger la bibliothèque à part (import()).
+  build: { chunkSizeWarningLimit: 1000 },
   plugins: [
     react(),
     VitePWA({

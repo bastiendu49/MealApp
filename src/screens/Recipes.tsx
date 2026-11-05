@@ -39,6 +39,9 @@ const today = () => new Date().toISOString().slice(0, 10)
 
 const byName = (a: Recipe, b: Recipe) => a.name.localeCompare(b.name, 'fr')
 
+/** Cartes affichées à la fois dans la grille. */
+const PAGE = 40
+
 export default function Recipes({
   recipes,
   ingredients,
@@ -75,6 +78,12 @@ export default function Recipes({
         .sort(byName),
     [base, query, filters, ctx],
   )
+  // Un millier de cartes d'un coup ferait ramer le téléphone : on en montre une page, puis plus
+  // à la demande. Le compteur repart à une page dès que la recherche ou les filtres changent.
+  const searchKey = `${segment}|${query}|${JSON.stringify(filters)}`
+  const [page, setPage] = useState({ key: searchKey, shown: PAGE })
+  const shown = page.key === searchKey ? page.shown : PAGE
+
   // Les rangées n'ont de sens que pour flâner dans la bibliothèque, pas pendant une recherche.
   const rows = useMemo(
     () => (segment === 'library' && !searching ? buildRows(recipes, { ...ctx, day: today() }) : []),
@@ -241,7 +250,18 @@ export default function Recipes({
               : 'Aucune recette ne correspond.'}
           </p>
         ) : (
-          <ul className="card-grid">{results.map(card)}</ul>
+          <>
+            <ul className="card-grid">{results.slice(0, shown).map(card)}</ul>
+            {results.length > shown && (
+              <button
+                type="button"
+                className="ghost-btn wide"
+                onClick={() => setPage({ key: searchKey, shown: shown + PAGE })}
+              >
+                Afficher plus ({results.length - shown} restantes)
+              </button>
+            )}
+          </>
         )}
       </section>
 
