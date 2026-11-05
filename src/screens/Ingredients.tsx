@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { slug } from '../data/catalogue'
 import { AISLES, COMMON_UNITS, type Aisle, type Ingredient, type Recipe } from '../domain/types'
 import { useBackGuard } from '../lib/useBackGuard'
+import { uid } from '../domain/store'
 
 /** Comparaison tolérante aux accents et à la casse, pour empêcher « Oignon » et « oignon ». */
 const norm = (s: string) => slug(s.trim())
@@ -144,7 +145,7 @@ export function IngredientForm({
     if (!valid) return
     onSave({
       // Un nom sans aucune lettre ni chiffre produirait un slug vide : on retombe sur un uuid.
-      id: initial?.id ?? (slug(name) || crypto.randomUUID()),
+      id: initial?.id ?? (slug(name) || uid()),
       name: name.trim(),
       unit: unit.trim(),
       aisle,

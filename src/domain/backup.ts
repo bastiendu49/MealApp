@@ -11,6 +11,7 @@ import {
   type Ingredient,
   type Recipe,
 } from './types'
+import { uid } from './id'
 
 /**
  * Format du fichier de sauvegarde. Les photos y voyagent en data URL : le JSON reste un
@@ -131,7 +132,7 @@ export function parseBackup(text: string): Result {
         const recipeId = str(e.recipeId)
         const servings = Number(e.servings)
         if (!recipeId || !Number.isFinite(servings) || servings < 1) return []
-        return [{ id: str(e.id) || crypto.randomUUID(), recipeId, servings }]
+        return [{ id: str(e.id) || uid(), recipeId, servings }]
       })
     : []
 
@@ -143,7 +144,7 @@ export function parseBackup(text: string): Result {
         const qty = e.qty === null || e.qty === undefined ? null : Number(e.qty)
         return [
           {
-            id: str(e.id) || crypto.randomUUID(),
+            id: str(e.id) || uid(),
             ingredientId,
             qty: qty !== null && Number.isFinite(qty) ? qty : null,
           },

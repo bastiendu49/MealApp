@@ -1,7 +1,7 @@
 import { get, set } from 'idb-keyval'
 import { useEffect, useState } from 'react'
 
-export const uid = () => crypto.randomUUID()
+export { uid } from './id'
 
 export type StoreState = { loaded: boolean; error: string | null }
 
